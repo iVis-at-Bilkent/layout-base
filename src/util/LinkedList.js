@@ -101,6 +101,30 @@ class LinkedList {
   shiftNode(){
     return remove( this.head, this );
   }
+
+  get_object_at( index ){
+    if(index <= this.length()){
+      var i = 1;
+      var current = this.head;
+      while(i < index){
+        current = current.next;
+        i++;
+      }
+      return current.value;
+    }
+  }
+
+  set_object_at( index, value){
+    if(index <= this.length()) {
+      var i = 1;
+      var current = this.head;
+      while (i < index) {
+        current = current.next;
+        i++;
+      }
+      current.value = value;
+    }
+  }
 }
 
 module.exports = LinkedList;
