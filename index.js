@@ -1,23 +1,29 @@
-module.exports = {
-	DimensionD : require('./src/util/DimensionD'),
-	HashMap : require('./src/util/HashMap'),
-	HashSet : require('./src/util/HashSet'),
-	IGeometry : require('./src/util/IGeometry'),
-	IMath : require('./src/util/IMath'),
-	Integer : require('./src/util/Integer'),
-	Point : require('./src/util/Point'),
-	PointD : require('./src/util/PointD'),
-	RandomSeed : require('./src/util/RandomSeed'),
-	RectangleD : require('./src/util/RectangleD'),
-	Transform : require('./src/util/Transform'),
-	UniqueIDGeneretor : require('./src/util/UniqueIDGeneretor'),
-	LGraphObject : require('./src/LGraphObject'),
-	LGraph : require('./src/LGraph'),
-	LEdge : require('./src/LEdge'),
-	LGraphManager : require('./src/LGraphManager'),
-	LNode : require('./src/LNode'),
-	Layout : require('./src/Layout'),
-	LayoutConstants : require('./src/LayoutConstants')
+'use strict';
+
+let layoutBase = function(){
+  return;
 };
+
+layoutBase.DimensionD = require('./src/util/DimensionD');
+layoutBase.HashMap = require('./src/util/HashMap');
+layoutBase.HashSet = require('./src/util/HashSet');
+layoutBase.IGeometry = require('./src/util/IGeometry');
+layoutBase.IMath = require('./src/util/IMath');
+layoutBase.Integer = require('./src/util/Integer');
+layoutBase.Point = require('./src/util/Point');
+layoutBase.PointD = require('./src/util/PointD');
+layoutBase.RandomSeed = require('./src/util/RandomSeed');
+layoutBase.RectangleD = require('./src/util/RectangleD');
+layoutBase.Transform = require('./src/util/Transform');
+layoutBase.UniqueIDGeneretor = require('./src/util/UniqueIDGeneretor');
+layoutBase.LGraphObject = require('./src/LGraphObject');
+layoutBase.LGraph = require('./src/LGraph');
+layoutBase.LEdge = require('./src/LEdge');
+layoutBase.LGraphManager = require('./src/LGraphManager');
+layoutBase.LNode = require('./src/LNode');
+layoutBase.Layout = require('./src/Layout');
+layoutBase.LayoutConstants = require('./src/LayoutConstants');
+
+module.exports = layoutBase;
 
 
