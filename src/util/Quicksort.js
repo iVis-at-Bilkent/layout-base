@@ -1,4 +1,4 @@
-const LinkedList = require('../data_structures/LinkedList.js');
+const LinkedList = require('./LinkedList.js');
 
 function Quicksort(){
 
