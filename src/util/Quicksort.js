@@ -29,8 +29,10 @@ Quicksort.quicksort = function(list, comparison_fn){
         return;
     }
 
-    if(comparison_fn === undefined){
-        comparison_fn = Quicksort.compare;
+	var comparison_function = comparison_fn;
+	
+    if( comparison_function === undefined){
+        comparison_function = Quicksort.compare;
     }
     var end_index;
 
@@ -43,7 +45,7 @@ Quicksort.quicksort = function(list, comparison_fn){
 
     // Prevent empty lists or arrays.
     if (end_index >= 0){
-        Quicksort.quicksort_between_indices(0, end_index);
+        Quicksort.quicksort_between_indices(list, 0, end_index, comparison_function);
     }
 
 };
