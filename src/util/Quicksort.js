@@ -5,7 +5,7 @@ function Quicksort(){
 }
 
 Quicksort.get_object_at =  function(list, i){
-    if( list instanceof []){
+    if( list instanceof Array){
         return list[i];
     }
     else if(list instanceof LinkedList){
@@ -14,7 +14,7 @@ Quicksort.get_object_at =  function(list, i){
 };
 
 Quicksort.set_object_at =  function(list, i, value){
-    if( list instanceof []){
+    if( list instanceof Array){
         list[i] = value;
     }
     else if(list instanceof LinkedList){
@@ -25,7 +25,7 @@ Quicksort.set_object_at =  function(list, i, value){
 Quicksort.quicksort = function(list, comparison_fn){
 
     // input must be an instance of LinkedList class or must be an array in order to sort
-    if (! ( (list instanceof LinkedList) || ( list instanceof []))){
+    if (! ( (list instanceof LinkedList) || ( list instanceof Array))){
         return;
     }
 
@@ -39,7 +39,7 @@ Quicksort.quicksort = function(list, comparison_fn){
     if (list instanceof LinkedList){
         end_index = list.size();
     }
-    else if( list instanceof [] ){
+    else if( list instanceof Array ){
         end_index = list.length-1;
     }
 
@@ -54,7 +54,7 @@ Quicksort.quicksort = function(list, comparison_fn){
 Quicksort.quicksort_between_indices = function(list, low, high, comparison_fn){
 
     // input must be an instance of LinkedList class or must be an array in order to sort
-    if (! ( (list instanceof LinkedList) || ( list instanceof []))){
+    if (! ( (list instanceof LinkedList) || ( list instanceof Array))){
         return;
     }
 
@@ -64,7 +64,7 @@ Quicksort.quicksort_between_indices = function(list, low, high, comparison_fn){
 
     var i = low;
     var j = high;
-    var middleIndex = ( i + j ) / 2;
+    var middleIndex = Math.floor( ( i + j ) / 2 );
     var middle = Quicksort.get_object_at(list, middleIndex);
 
     do
@@ -85,7 +85,7 @@ Quicksort.quicksort_between_indices = function(list, low, high, comparison_fn){
         if (i <= j){
 
             var temp = Quicksort.get_object_at(list, i);
-            Quicksort.set_object_at(list, i, Quicksort.getObjectAt(j));
+            Quicksort.set_object_at(list, i, Quicksort.get_object_at(list, j));
             Quicksort.set_object_at(list, j, temp);
             i++;
             j--;
@@ -96,13 +96,13 @@ Quicksort.quicksort_between_indices = function(list, low, high, comparison_fn){
 
     if( low < j ){
 
-        Quicksort.quicksort_between_indices(low, j);
+        Quicksort.quicksort_between_indices(list, low, j, comparison_fn);
 
     }
 
     if( high > i){
 
-        Quicksort.quicksort_between_indices(i, high);
+        Quicksort.quicksort_between_indices(list, i, high, comparison_fn);
 
     }
 
