@@ -4,6 +4,10 @@ let layoutBase = function(){
   return;
 };
 
+layoutBase.FDLayout = require('./src/fd/FDLayout');
+layoutBase.FDLayoutConstants = require('./src/fd/FDLayoutConstants');
+layoutBase.FDLayoutEdge = require('./src/fd/FDLayoutEdge');
+layoutBase.FDLayoutNode = require('./src/fd/FDLayoutNode');
 layoutBase.DimensionD = require('./src/util/DimensionD');
 layoutBase.HashMap = require('./src/util/HashMap');
 layoutBase.HashSet = require('./src/util/HashSet');
