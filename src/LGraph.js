@@ -4,7 +4,6 @@ var LayoutConstants = require('./LayoutConstants');
 var LGraphManager = require('./LGraphManager');
 var LNode = require('./LNode');
 var LEdge = require('./LEdge');
-var HashSet = require('./util/HashSet');
 var RectangleD = require('./util/RectangleD');
 var Point = require('./util/Point');
 var LinkedList = require('./util/LinkedList');
@@ -417,25 +416,25 @@ LGraph.prototype.updateConnected = function ()
     return;
   }
 
-  var toBeVisited = new LinkedList();
-  var visited = new HashSet();
+  var queue = new LinkedList();
+  var visited = new Set();
   var currentNode = this.nodes[0];
   var neighborEdges;
   var currentNeighbor;
   var childrenOfNode = currentNode.withChildren();
   childrenOfNode.forEach(function(node) {
-    toBeVisited.push(node);
+    queue.push(node);
+    visited.add(node);
   });
 
-  while (toBeVisited.length !== 0)
+  while (queue.length !== 0)
   {
-    currentNode = toBeVisited.shift();
-    visited.add(currentNode);
+    currentNode = queue.shift();
 
     // Traverse all neighbors of this node
     neighborEdges = currentNode.getEdges();
-    var s = neighborEdges.length;
-    for (var i = 0; i < s; i++)
+    var size = neighborEdges.length;
+    for (var i = 0; i < size; i++)
     {
       var neighborEdge = neighborEdges[i];
       currentNeighbor =
@@ -443,12 +442,13 @@ LGraph.prototype.updateConnected = function ()
 
       // Add unvisited neighbors to the list to visit
       if (currentNeighbor != null &&
-              !visited.contains(currentNeighbor))
+              !visited.has(currentNeighbor))
       {
         var childrenOfNeighbor = currentNeighbor.withChildren();
 
         childrenOfNeighbor.forEach(function(node) {
-          toBeVisited.push(node);
+          queue.push(node);
+          visited.add(node);
         });
       }
     }
@@ -456,13 +456,11 @@ LGraph.prototype.updateConnected = function ()
 
   this.isConnected = false;
 
-  if (visited.size() >= this.nodes.length)
+  if (visited.size >= this.nodes.length)
   {
     var noOfVisitedInThisGraph = 0;
 
-    var s = visited.size();
-     Object.keys(visited.set).forEach(function(visitedId) {
-      var visitedNode = visited.set[visitedId];
+    visited.forEach(function(visitedNode) {
       if (visitedNode.owner == self)
       {
         noOfVisitedInThisGraph++;
