@@ -221,10 +221,18 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
 
 FDLayout.prototype.initSpringEmbedder = function () {
 
+  var s = this.getAllNodes().length;
   if (this.incremental) {
+    if (s > FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) {
+      this.coolingFactor = Math.max(this.coolingFactor * FDLayoutConstants.COOLING_ADAPTATION_FACTOR, this.coolingFactor - (s - FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) / (FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT - FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) * this.coolingFactor * (1 - FDLayoutConstants.COOLING_ADAPTATION_FACTOR));
+    }
     this.maxNodeDisplacement = FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL;
   } else {
-    this.coolingFactor = 1.0;
+    if (s > FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) {
+      this.coolingFactor = Math.max(FDLayoutConstants.COOLING_ADAPTATION_FACTOR, 1.0 - (s - FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) / (FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT - FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT) * (1 - FDLayoutConstants.COOLING_ADAPTATION_FACTOR));
+    } else {
+      this.coolingFactor = 1.0;
+    }
     this.initialCoolingFactor = 1.0;
     this.maxNodeDisplacement = FDLayoutConstants.MAX_NODE_DISPLACEMENT;
   }
@@ -3691,7 +3699,10 @@ FDLayoutConstants.DEFAULT_GRAVITY_RANGE_FACTOR = 3.8;
 FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_RANGE_FACTOR = 1.5;
 FDLayoutConstants.DEFAULT_USE_SMART_IDEAL_EDGE_LENGTH_CALCULATION = true;
 FDLayoutConstants.DEFAULT_USE_SMART_REPULSION_RANGE_CALCULATION = true;
-FDLayoutConstants.DEFAULT_COOLING_FACTOR_INCREMENTAL = 0.5;
+FDLayoutConstants.DEFAULT_COOLING_FACTOR_INCREMENTAL = 0.3;
+FDLayoutConstants.COOLING_ADAPTATION_FACTOR = 0.33;
+FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT = 1000;
+FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT = 5000;
 FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL = 100.0;
 FDLayoutConstants.MAX_NODE_DISPLACEMENT = FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL * 3;
 FDLayoutConstants.MIN_REPULSION_DIST = FDLayoutConstants.DEFAULT_EDGE_LENGTH / 10.0;

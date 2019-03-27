@@ -92,17 +92,24 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
 
 FDLayout.prototype.initSpringEmbedder = function () {
 
-  if (this.incremental)
-  {
-    this.maxNodeDisplacement =
-            FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL;
-  }
-  else
-  {
-    this.coolingFactor = 1.0;
+  var s = this.getAllNodes().length;
+  if (this.incremental) {
+    if(s > FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT){   
+      this.coolingFactor = Math.max(this.coolingFactor*FDLayoutConstants.COOLING_ADAPTATION_FACTOR, this.coolingFactor - 
+              (s-FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT)/(FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT-FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT)*this.coolingFactor*(1-FDLayoutConstants.COOLING_ADAPTATION_FACTOR));
+    }
+    this.maxNodeDisplacement = FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL;
+  } 
+  else {
+    if(s > FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT){
+      this.coolingFactor = Math.max(FDLayoutConstants.COOLING_ADAPTATION_FACTOR, 1.0 - 
+              (s-FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT)/(FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT-FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT)*(1-FDLayoutConstants.COOLING_ADAPTATION_FACTOR));
+    }
+    else {
+      this.coolingFactor = 1.0;
+    }
     this.initialCoolingFactor = 1.0;
-    this.maxNodeDisplacement =
-            FDLayoutConstants.MAX_NODE_DISPLACEMENT;
+    this.maxNodeDisplacement = FDLayoutConstants.MAX_NODE_DISPLACEMENT;
   }
 
   this.maxIterations =
