@@ -78,7 +78,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function LayoutConstants() {}
 
@@ -156,6 +159,9 @@ module.exports = LayoutConstants;
 /***/ }),
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LGraphObject = __webpack_require__(2);
 var IGeometry = __webpack_require__(8);
@@ -282,7 +288,10 @@ module.exports = LEdge;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function LGraphObject(vGraphObject) {
   this.vGraphObject = vGraphObject;
@@ -293,6 +302,9 @@ module.exports = LGraphObject;
 /***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LGraphObject = __webpack_require__(2);
 var Integer = __webpack_require__(10);
@@ -633,7 +645,10 @@ module.exports = LNode;
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function PointD(x, y) {
   if (x == null && y == null) {
@@ -680,6 +695,9 @@ module.exports = PointD;
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LGraphObject = __webpack_require__(2);
 var Integer = __webpack_require__(10);
@@ -1103,6 +1121,9 @@ module.exports = LGraph;
 /***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LGraph;
 var LEdge = __webpack_require__(1);
@@ -1542,6 +1563,9 @@ module.exports = LGraphManager;
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var LayoutConstants = __webpack_require__(0);
 
 function FDLayoutConstants() {}
@@ -1578,7 +1602,10 @@ module.exports = FDLayoutConstants;
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function IGeometry() {}
 
@@ -1912,7 +1939,10 @@ module.exports = IGeometry;
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function IMath() {}
 
@@ -1941,7 +1971,10 @@ module.exports = IMath;
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function Integer() {}
 
@@ -1952,11 +1985,20 @@ module.exports = Integer;
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-const nodeFrom = value => ({ value, next: null, prev: null });
+"use strict";
 
-const add = (prev, node, next, list) => {
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var nodeFrom = function nodeFrom(value) {
+  return { value: value, next: null, prev: null };
+};
+
+var add = function add(prev, node, next, list) {
   if (prev !== null) {
     prev.next = node;
   } else {
@@ -1977,8 +2019,10 @@ const add = (prev, node, next, list) => {
   return node;
 };
 
-const remove = (node, list) => {
-  let { prev, next } = node;
+var _remove = function _remove(node, list) {
+  var prev = node.prev,
+      next = node.next;
+
 
   if (prev !== null) {
     prev.next = next;
@@ -1999,95 +2043,122 @@ const remove = (node, list) => {
   return node;
 };
 
-class LinkedList {
-  constructor(vals) {
+var LinkedList = function () {
+  function LinkedList(vals) {
+    var _this = this;
+
+    _classCallCheck(this, LinkedList);
+
     this.length = 0;
     this.head = null;
     this.tail = null;
 
     if (vals != null) {
-      vals.forEach(v => this.push(v));
+      vals.forEach(function (v) {
+        return _this.push(v);
+      });
     }
   }
 
-  size() {
-    return this.length;
-  }
-
-  insertBefore(val, otherNode) {
-    return add(otherNode.prev, nodeFrom(val), otherNode, this);
-  }
-
-  insertAfter(val, otherNode) {
-    return add(otherNode, nodeFrom(val), otherNode.next, this);
-  }
-
-  insertNodeBefore(newNode, otherNode) {
-    return add(otherNode.prev, newNode, otherNode, this);
-  }
-
-  insertNodeAfter(newNode, otherNode) {
-    return add(otherNode, newNode, otherNode.next, this);
-  }
-
-  push(val) {
-    return add(this.tail, nodeFrom(val), null, this);
-  }
-
-  unshift(val) {
-    return add(null, nodeFrom(val), this.head, this);
-  }
-
-  remove(node) {
-    return remove(node, this);
-  }
-
-  pop() {
-    return remove(this.tail, this).value;
-  }
-
-  popNode() {
-    return remove(this.tail, this);
-  }
-
-  shift() {
-    return remove(this.head, this).value;
-  }
-
-  shiftNode() {
-    return remove(this.head, this);
-  }
-
-  get_object_at(index) {
-    if (index <= this.length()) {
-      var i = 1;
-      var current = this.head;
-      while (i < index) {
-        current = current.next;
-        i++;
+  _createClass(LinkedList, [{
+    key: "size",
+    value: function size() {
+      return this.length;
+    }
+  }, {
+    key: "insertBefore",
+    value: function insertBefore(val, otherNode) {
+      return add(otherNode.prev, nodeFrom(val), otherNode, this);
+    }
+  }, {
+    key: "insertAfter",
+    value: function insertAfter(val, otherNode) {
+      return add(otherNode, nodeFrom(val), otherNode.next, this);
+    }
+  }, {
+    key: "insertNodeBefore",
+    value: function insertNodeBefore(newNode, otherNode) {
+      return add(otherNode.prev, newNode, otherNode, this);
+    }
+  }, {
+    key: "insertNodeAfter",
+    value: function insertNodeAfter(newNode, otherNode) {
+      return add(otherNode, newNode, otherNode.next, this);
+    }
+  }, {
+    key: "push",
+    value: function push(val) {
+      return add(this.tail, nodeFrom(val), null, this);
+    }
+  }, {
+    key: "unshift",
+    value: function unshift(val) {
+      return add(null, nodeFrom(val), this.head, this);
+    }
+  }, {
+    key: "remove",
+    value: function remove(node) {
+      return _remove(node, this);
+    }
+  }, {
+    key: "pop",
+    value: function pop() {
+      return _remove(this.tail, this).value;
+    }
+  }, {
+    key: "popNode",
+    value: function popNode() {
+      return _remove(this.tail, this);
+    }
+  }, {
+    key: "shift",
+    value: function shift() {
+      return _remove(this.head, this).value;
+    }
+  }, {
+    key: "shiftNode",
+    value: function shiftNode() {
+      return _remove(this.head, this);
+    }
+  }, {
+    key: "get_object_at",
+    value: function get_object_at(index) {
+      if (index <= this.length()) {
+        var i = 1;
+        var current = this.head;
+        while (i < index) {
+          current = current.next;
+          i++;
+        }
+        return current.value;
       }
-      return current.value;
     }
-  }
-
-  set_object_at(index, value) {
-    if (index <= this.length()) {
-      var i = 1;
-      var current = this.head;
-      while (i < index) {
-        current = current.next;
-        i++;
+  }, {
+    key: "set_object_at",
+    value: function set_object_at(index, value) {
+      if (index <= this.length()) {
+        var i = 1;
+        var current = this.head;
+        while (i < index) {
+          current = current.next;
+          i++;
+        }
+        current.value = value;
       }
-      current.value = value;
     }
-  }
-}
+  }]);
+
+  return LinkedList;
+}();
 
 module.exports = LinkedList;
 
 /***/ }),
 /* 12 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function RectangleD(x, y, width, height) {
   this.x = 0;
@@ -2199,7 +2270,12 @@ module.exports = RectangleD;
 
 /***/ }),
 /* 13 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function UniqueIDGeneretor() {}
 
@@ -2223,7 +2299,7 @@ UniqueIDGeneretor.getString = function (id) {
 };
 
 UniqueIDGeneretor.isPrimitive = function (arg) {
-  var type = typeof arg;
+  var type = typeof arg === "undefined" ? "undefined" : _typeof(arg);
   return arg == null || type != "object" && type != "function";
 };
 
@@ -2232,6 +2308,11 @@ module.exports = UniqueIDGeneretor;
 /***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var LayoutConstants = __webpack_require__(0);
 var LGraphManager = __webpack_require__(6);
@@ -2622,7 +2703,7 @@ Layout.prototype.getFlatForest = function () {
     // visited and parents lists. Continue with the next component of
     // the graph, if any.
     else {
-        var temp = [...visited];
+        var temp = [].concat(_toConsumableArray(visited));
         flatForest.push(temp);
         //flatForest = flatForest.concat(temp);
         //unProcessedNodes.removeAll(visited);
@@ -2691,7 +2772,7 @@ Layout.prototype.createDummyNodesForBendpoints = function (edge) {
 Layout.prototype.createBendpointsFromDummyNodes = function () {
   var edges = [];
   edges = edges.concat(this.graphManager.getAllEdges());
-  edges = [...this.edgeToDummyNodes.keys()].concat(edges);
+  edges = [].concat(_toConsumableArray(this.edgeToDummyNodes.keys())).concat(edges);
 
   for (var k = 0; k < edges.length; k++) {
     var lEdge = edges[k];
@@ -2830,7 +2911,10 @@ module.exports = Layout;
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /*
  *This class is the javascript implementation of the Point.java class in jdk
@@ -2904,7 +2988,10 @@ module.exports = Point;
 
 /***/ }),
 /* 16 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function RandomSeed() {}
 RandomSeed.seed = 1;
@@ -2920,6 +3007,9 @@ module.exports = RandomSeed;
 /***/ }),
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var PointD = __webpack_require__(4);
 
@@ -3050,6 +3140,11 @@ module.exports = Transform;
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var Layout = __webpack_require__(14);
 var FDLayoutConstants = __webpack_require__(7);
 var LayoutConstants = __webpack_require__(0);
@@ -3168,7 +3263,10 @@ FDLayout.prototype.calcSpringForces = function () {
   }
 };
 
-FDLayout.prototype.calcRepulsionForces = function (gridUpdateAllowed = true, forceToNodeSurroundingUpdate = false) {
+FDLayout.prototype.calcRepulsionForces = function () {
+  var gridUpdateAllowed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+  var forceToNodeSurroundingUpdate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
   var i, j;
   var nodeA, nodeB;
   var lNodes = this.getAllNodes();
@@ -3504,7 +3602,7 @@ FDLayout.prototype.calculateRepulsionForceOfANode = function (nodeA, processedNo
       }
     }
 
-    nodeA.surrounding = [...surrounding];
+    nodeA.surrounding = [].concat(_toConsumableArray(surrounding));
   }
   for (i = 0; i < nodeA.surrounding.length; i++) {
     this.calcRepulsionForce(nodeA, nodeA.surrounding[i]);
@@ -3520,6 +3618,9 @@ module.exports = FDLayout;
 /***/ }),
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LEdge = __webpack_require__(1);
 var FDLayoutConstants = __webpack_require__(7);
@@ -3540,6 +3641,9 @@ module.exports = FDLayoutEdge;
 /***/ }),
 /* 20 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var LNode = __webpack_require__(3);
 
@@ -3584,7 +3688,10 @@ module.exports = FDLayoutNode;
 
 /***/ }),
 /* 21 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function DimensionD(width, height) {
   this.width = 0;
@@ -3616,6 +3723,9 @@ module.exports = DimensionD;
 /***/ }),
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var UniqueIDGeneretor = __webpack_require__(13);
 
@@ -3651,6 +3761,9 @@ module.exports = HashMap;
 /***/ }),
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var UniqueIDGeneretor = __webpack_require__(13);
 
@@ -3711,7 +3824,10 @@ module.exports = HashSet;
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const LinkedList = __webpack_require__(11);
+"use strict";
+
+
+var LinkedList = __webpack_require__(11);
 
 function Quicksort() {}
 
@@ -3820,7 +3936,7 @@ module.exports = Quicksort;
 "use strict";
 
 
-let layoutBase = function () {
+var layoutBase = function layoutBase() {
   return;
 };
 
@@ -3854,7 +3970,10 @@ module.exports = layoutBase;
 
 /***/ }),
 /* 26 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 function Emitter() {
   this.listeners = [];
