@@ -1,5 +1,4 @@
 var LayoutConstants = require('./LayoutConstants');
-var HashMap = require('./util/HashMap');
 var LGraphManager = require('./LGraphManager');
 var LNode = require('./LNode');
 var LEdge = require('./LEdge');
@@ -7,7 +6,6 @@ var LGraph = require('./LGraph');
 var PointD = require('./util/PointD');
 var Transform = require('./util/Transform');
 var Emitter = require('./util/Emitter');
-var HashSet = require('./util/HashSet');
 
 function Layout(isRemoteUse) {
   Emitter.call( this );
@@ -38,7 +36,7 @@ function Layout(isRemoteUse) {
    * This is used for creation of bendpoints by using dummy nodes and edges.
    * Maps an LEdge to its dummy bendpoint path.
    */
-  this.edgeToDummyNodes = new HashMap();
+  this.edgeToDummyNodes = new Map();
   this.graphManager = new LGraphManager(this);
   this.isLayoutFinished = false;
   this.isSubLayout = false;
@@ -376,9 +374,9 @@ Layout.prototype.getFlatForest = function ()
 
   // Run BFS for each component of the graph.
 
-  var visited = new HashSet();
+  var visited = new Set();
   var toBeVisited = [];
-  var parents = new HashMap();
+  var parents = new Map();
   var unProcessedNodes = [];
 
   unProcessedNodes = unProcessedNodes.concat(allNodes);
@@ -412,10 +410,10 @@ Layout.prototype.getFlatForest = function ()
         if (parents.get(currentNode) != currentNeighbor)
         {
           // We haven't previously visited this neighbor.
-          if (!visited.contains(currentNeighbor))
+          if (!visited.has(currentNeighbor))
           {
             toBeVisited.push(currentNeighbor);
-            parents.put(currentNeighbor, currentNode);
+            parents.set(currentNeighbor, currentNode);
           }
           // Since we have previously visited this neighbor and
           // this neighbor is not parent of currentNode, given
@@ -441,8 +439,7 @@ Layout.prototype.getFlatForest = function ()
     // the graph, if any.
     else
     {
-      var temp = [];
-      visited.addAllTo(temp);
+      var temp = [...visited];
       flatForest.push(temp);
       //flatForest = flatForest.concat(temp);
       //unProcessedNodes.removeAll(visited);
@@ -453,8 +450,8 @@ Layout.prototype.getFlatForest = function ()
           unProcessedNodes.splice(index, 1);
         }
       }
-      visited = new HashSet();
-      parents = new HashMap();
+      visited = new Set();
+      parents = new Map();
     }
   }
 
@@ -492,7 +489,7 @@ Layout.prototype.createDummyNodesForBendpoints = function (edge)
   var dummyEdge = this.newEdge(null);
   this.graphManager.add(dummyEdge, prev, edge.target);
 
-  this.edgeToDummyNodes.put(edge, dummyNodes);
+  this.edgeToDummyNodes.set(edge, dummyNodes);
 
   // remove real edge from graph manager if it is inter-graph
   if (edge.isInterGraph())
@@ -516,7 +513,7 @@ Layout.prototype.createBendpointsFromDummyNodes = function ()
 {
   var edges = [];
   edges = edges.concat(this.graphManager.getAllEdges());
-  edges = this.edgeToDummyNodes.keySet().concat(edges);
+  edges = [...this.edgeToDummyNodes.keys()].concat(edges);
 
   for (var k = 0; k < edges.length; k++)
   {
@@ -593,7 +590,7 @@ Layout.findCenterOfTree = function (nodes)
   list = list.concat(nodes);
 
   var removedNodes = [];
-  var remainingDegrees = new HashMap();
+  var remainingDegrees = new Map();
   var foundCenter = false;
   var centerNode = null;
 
@@ -606,8 +603,8 @@ Layout.findCenterOfTree = function (nodes)
   for (var i = 0; i < list.length; i++)
   {
     var node = list[i];
-    var degree = node.getNeighborsList().size();
-    remainingDegrees.put(node, node.getNeighborsList().size());
+    var degree = node.getNeighborsList().size;
+    remainingDegrees.set(node, node.getNeighborsList().size);
 
     if (degree == 1)
     {
@@ -635,8 +632,7 @@ Layout.findCenterOfTree = function (nodes)
 
       var neighbours = node.getNeighborsList();
 
-      Object.keys(neighbours.set).forEach(function(j) {
-        var neighbour = neighbours.set[j];
+      neighbours.forEach(function(neighbour) {
         if (removedNodes.indexOf(neighbour) < 0)
         {
           var otherDegree = remainingDegrees.get(neighbour);
@@ -647,7 +643,7 @@ Layout.findCenterOfTree = function (nodes)
             tempList.push(neighbour);
           }
 
-          remainingDegrees.put(neighbour, newDegree);
+          remainingDegrees.set(neighbour, newDegree);
         }
       });
     }

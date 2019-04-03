@@ -4,7 +4,6 @@ var RectangleD = require('./util/RectangleD');
 var LayoutConstants = require('./LayoutConstants');
 var RandomSeed = require('./util/RandomSeed');
 var PointD = require('./util/PointD');
-var HashSet = require('./util/HashSet');
 
 function LNode(gm, loc, size, vNode) {
   //Alternative constructor 1 : LNode(LGraphManager gm, Point loc, Dimension size, Object vNode)
@@ -176,8 +175,7 @@ LNode.prototype.getEdgesBetween = function (other)
 
 LNode.prototype.getNeighborsList = function ()
 {
-  var neighbors = new HashSet();
-  var edge;
+  var neighbors = new Set();
   
   var self = this;
   self.edges.forEach(function(edge) {
