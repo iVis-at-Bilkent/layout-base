@@ -97,7 +97,7 @@ FDLayout.prototype.initSpringEmbedder = function () {
     else {
       this.coolingFactor = 1.0;
     }
-    this.initialCoolingFactor = 1.0;
+    this.initialCoolingFactor = this.coolingFactor;
     this.maxNodeDisplacement = FDLayoutConstants.MAX_NODE_DISPLACEMENT;
   }
 
