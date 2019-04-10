@@ -2,17 +2,14 @@ function LayoutConstants() {
 }
 
 /**
- * Layout Quality
+ * Layout Quality: 0:draft, 1:default, 2:proof
  */
-LayoutConstants.PROOF_QUALITY = 0;
-LayoutConstants.DEFAULT_QUALITY = 1;
-LayoutConstants.DRAFT_QUALITY = 2;
+LayoutConstants.QUALITY = 1;
 
 /**
  * Default parameters
  */
 LayoutConstants.DEFAULT_CREATE_BENDS_AS_NEEDED = false;
-//LayoutConstants.DEFAULT_INCREMENTAL = true;
 LayoutConstants.DEFAULT_INCREMENTAL = false;
 LayoutConstants.DEFAULT_ANIMATION_ON_LAYOUT = true;
 LayoutConstants.DEFAULT_ANIMATION_DURING_LAYOUT = false;

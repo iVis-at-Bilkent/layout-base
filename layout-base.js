@@ -86,17 +86,14 @@ return /******/ (function(modules) { // webpackBootstrap
 function LayoutConstants() {}
 
 /**
- * Layout Quality
+ * Layout Quality: 0:draft, 1:default, 2:proof
  */
-LayoutConstants.PROOF_QUALITY = 0;
-LayoutConstants.DEFAULT_QUALITY = 1;
-LayoutConstants.DRAFT_QUALITY = 2;
+LayoutConstants.QUALITY = 1;
 
 /**
  * Default parameters
  */
 LayoutConstants.DEFAULT_CREATE_BENDS_AS_NEEDED = false;
-//LayoutConstants.DEFAULT_INCREMENTAL = true;
 LayoutConstants.DEFAULT_INCREMENTAL = false;
 LayoutConstants.DEFAULT_ANIMATION_ON_LAYOUT = true;
 LayoutConstants.DEFAULT_ANIMATION_DURING_LAYOUT = false;
@@ -2326,8 +2323,8 @@ var Emitter = __webpack_require__(26);
 function Layout(isRemoteUse) {
   Emitter.call(this);
 
-  //Layout Quality: 0:proof, 1:default, 2:draft
-  this.layoutQuality = LayoutConstants.DEFAULT_QUALITY;
+  //Layout Quality: 0:draft, 1:default, 2:proof
+  this.layoutQuality = LayoutConstants.QUALITY;
   //Whether layout should create bendpoints as needed or not
   this.createBendsAsNeeded = LayoutConstants.DEFAULT_CREATE_BENDS_AS_NEEDED;
   //Whether layout should be incremental or not
@@ -2546,7 +2543,7 @@ Layout.prototype.update = function (obj) {
  */
 Layout.prototype.initParameters = function () {
   if (!this.isSubLayout) {
-    this.layoutQuality = LayoutConstants.DEFAULT_QUALITY;
+    this.layoutQuality = LayoutConstants.QUALITY;
     this.animationDuringLayout = LayoutConstants.DEFAULT_ANIMATION_DURING_LAYOUT;
     this.animationPeriod = LayoutConstants.DEFAULT_ANIMATION_PERIOD;
     this.animationOnLayout = LayoutConstants.DEFAULT_ANIMATION_ON_LAYOUT;
@@ -3178,14 +3175,6 @@ for (var prop in Layout) {
 
 FDLayout.prototype.initParameters = function () {
   Layout.prototype.initParameters.call(this, arguments);
-
-  if (this.layoutQuality == LayoutConstants.DRAFT_QUALITY) {
-    this.displacementThresholdPerNode += 0.30;
-    this.maxIterations *= 0.8;
-  } else if (this.layoutQuality == LayoutConstants.PROOF_QUALITY) {
-    this.displacementThresholdPerNode -= 0.30;
-    this.maxIterations *= 1.2;
-  }
 
   this.totalIterations = 0;
   this.notAnimatedIterations = 0;

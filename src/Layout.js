@@ -10,8 +10,8 @@ var Emitter = require('./util/Emitter');
 function Layout(isRemoteUse) {
   Emitter.call( this );
 
-  //Layout Quality: 0:proof, 1:default, 2:draft
-  this.layoutQuality = LayoutConstants.DEFAULT_QUALITY;
+  //Layout Quality: 0:draft, 1:default, 2:proof
+  this.layoutQuality = LayoutConstants.QUALITY;
   //Whether layout should create bendpoints as needed or not
   this.createBendsAsNeeded =
           LayoutConstants.DEFAULT_CREATE_BENDS_AS_NEEDED;
@@ -258,7 +258,7 @@ Layout.prototype.update = function (obj) {
 Layout.prototype.initParameters = function () {
   if (!this.isSubLayout)
   {
-    this.layoutQuality = LayoutConstants.DEFAULT_QUALITY;
+    this.layoutQuality = LayoutConstants.QUALITY;
     this.animationDuringLayout = LayoutConstants.DEFAULT_ANIMATION_DURING_LAYOUT;
     this.animationPeriod = LayoutConstants.DEFAULT_ANIMATION_PERIOD;
     this.animationOnLayout = LayoutConstants.DEFAULT_ANIMATION_ON_LAYOUT;

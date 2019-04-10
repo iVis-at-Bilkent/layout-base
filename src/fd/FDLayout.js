@@ -32,17 +32,6 @@ for (var prop in Layout) {
 FDLayout.prototype.initParameters = function () {
   Layout.prototype.initParameters.call(this, arguments);
 
-  if (this.layoutQuality == LayoutConstants.DRAFT_QUALITY)
-  {
-    this.displacementThresholdPerNode += 0.30;
-    this.maxIterations *= 0.8;
-  }
-  else if (this.layoutQuality == LayoutConstants.PROOF_QUALITY)
-  {
-    this.displacementThresholdPerNode -= 0.30;
-    this.maxIterations *= 1.2;
-  }
-
   this.totalIterations = 0;
   this.notAnimatedIterations = 0;
 
