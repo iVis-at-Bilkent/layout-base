@@ -16,4 +16,4 @@ Add `layout-base` as a dependecy to your layout extension.
  
  For a usage example, see [cose-base](https://github.com/iVis-at-Bilkent/cose-base) or [avsdf-base](https://github.com/iVis-at-Bilkent/avsdf-base).
  
- ![](https://github.com/iVis-at-Bilkent/layout-base/blob/unstable/layout-schema.png)
+ ![](https://github.com/iVis-at-Bilkent/layout-base/blob/master/layout-schema.png)
