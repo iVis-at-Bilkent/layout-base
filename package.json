@@ -1,7 +1,7 @@
 {
   "name": "layout-base",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basic layout model and some utilities for Cytoscape.js layout extensions",
   "main": "layout-base.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
