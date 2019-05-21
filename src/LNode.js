@@ -107,6 +107,14 @@ LNode.prototype.getDiagonal = function ()
           this.rect.height * this.rect.height);
 };
 
+/**
+ * This method returns half the diagonal length of this node.
+ */
+LNode.prototype.getHalfTheDiagonal = function () {
+  return Math.sqrt(this.rect.height * this.rect.height +
+      this.rect.width * this.rect.width) / 2;
+};
+
 LNode.prototype.setRect = function (upperLeft, dimension)
 {
   this.rect.x = upperLeft.x;

@@ -393,6 +393,13 @@ LNode.prototype.getDiagonal = function () {
   return Math.sqrt(this.rect.width * this.rect.width + this.rect.height * this.rect.height);
 };
 
+/**
+ * This method returns half the diagonal length of this node.
+ */
+LNode.prototype.getHalfTheDiagonal = function () {
+  return Math.sqrt(this.rect.height * this.rect.height + this.rect.width * this.rect.width) / 2;
+};
+
 LNode.prototype.setRect = function (upperLeft, dimension) {
   this.rect.x = upperLeft.x;
   this.rect.y = upperLeft.y;
@@ -2044,6 +2051,31 @@ IGeometry.angleOfVector = function (Cx, Cy, Nx, Ny) {
   }
 
   return C_angle;
+};
+
+/**
+ * This method checks whether the given two line segments (one with point
+ * p1 and p2, the other with point p3 and p4) intersect at a point other
+ * than these points.
+ */
+IGeometry.doIntersect = function (p1, p2, p3, p4) {
+  var a = p1.x;
+  var b = p1.y;
+  var c = p2.x;
+  var d = p2.y;
+  var p = p3.x;
+  var q = p3.y;
+  var r = p4.x;
+  var s = p4.y;
+  var det = (c - a) * (s - q) - (r - p) * (d - b);
+
+  if (det === 0) {
+    return false;
+  } else {
+    var lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    var gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
+  }
 };
 
 // -----------------------------------------------------------------------------

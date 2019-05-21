@@ -525,6 +525,33 @@ IGeometry.angleOfVector = function(Cx, Cy, Nx, Ny)
   return C_angle;
 };
 
+
+/**
+ * This method checks whether the given two line segments (one with point
+ * p1 and p2, the other with point p3 and p4) intersect at a point other
+ * than these points.
+ */
+IGeometry.doIntersect = function(p1, p2, p3, p4){
+  let a = p1.x;
+  let b = p1.y;
+  let c = p2.x;
+  let d = p2.y;
+  let p = p3.x;
+  let q = p3.y;
+  let r = p4.x;
+  let s = p4.y;
+  let det = (c - a) * (s - q) - (r - p) * (d - b);
+
+  if (det === 0) {
+    return false;
+  } else {
+    let lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    let gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+  }
+};
+
+
 // -----------------------------------------------------------------------------
 // Section: Class Constants
 // -----------------------------------------------------------------------------
