@@ -17,14 +17,14 @@ IMath.sign = function (value) {
   {
     return 0;
   }
-}
+};
 
 IMath.floor = function (value) {
   return value < 0 ? Math.ceil(value) : Math.floor(value);
-}
+};
 
 IMath.ceil = function (value) {
   return value < 0 ? Math.floor(value) : Math.ceil(value);
-}
+};
 
 module.exports = IMath;

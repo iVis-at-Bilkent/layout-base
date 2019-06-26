@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 25);
+/******/ 	return __webpack_require__(__webpack_require__.s = 26);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -305,7 +305,7 @@ module.exports = LGraphObject;
 
 var LGraphObject = __webpack_require__(2);
 var Integer = __webpack_require__(10);
-var RectangleD = __webpack_require__(12);
+var RectangleD = __webpack_require__(13);
 var LayoutConstants = __webpack_require__(0);
 var RandomSeed = __webpack_require__(16);
 var PointD = __webpack_require__(4);
@@ -391,6 +391,13 @@ LNode.prototype.getRect = function () {
 
 LNode.prototype.getDiagonal = function () {
   return Math.sqrt(this.rect.width * this.rect.width + this.rect.height * this.rect.height);
+};
+
+/**
+ * This method returns half the diagonal length of this node.
+ */
+LNode.prototype.getHalfTheDiagonal = function () {
+  return Math.sqrt(this.rect.height * this.rect.height + this.rect.width * this.rect.width) / 2;
 };
 
 LNode.prototype.setRect = function (upperLeft, dimension) {
@@ -702,8 +709,8 @@ var LayoutConstants = __webpack_require__(0);
 var LGraphManager = __webpack_require__(6);
 var LNode = __webpack_require__(3);
 var LEdge = __webpack_require__(1);
-var RectangleD = __webpack_require__(12);
-var Point = __webpack_require__(15);
+var RectangleD = __webpack_require__(13);
+var Point = __webpack_require__(12);
 var LinkedList = __webpack_require__(11);
 
 function LGraph(parent, obj2, vGraph) {
@@ -1604,32 +1611,100 @@ module.exports = FDLayoutConstants;
 "use strict";
 
 
+/**
+ * This class maintains a list of static geometry related utility methods.
+ *
+ *
+ * Copyright: i-Vis Research Group, Bilkent University, 2007 - present
+ */
+
+var Point = __webpack_require__(12);
+
 function IGeometry() {}
 
+/**
+ * This method calculates *half* the amount in x and y directions of the two
+ * input rectangles needed to separate them keeping their respective
+ * positioning, and returns the result in the input array. An input
+ * separation buffer added to the amount in both directions. We assume that
+ * the two rectangles do intersect.
+ */
 IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separationBuffer) {
   if (!rectA.intersects(rectB)) {
     throw "assert failed";
   }
+
   var directions = new Array(2);
-  IGeometry.decideDirectionsForOverlappingNodes(rectA, rectB, directions);
+
+  this.decideDirectionsForOverlappingNodes(rectA, rectB, directions);
+
   overlapAmount[0] = Math.min(rectA.getRight(), rectB.getRight()) - Math.max(rectA.x, rectB.x);
   overlapAmount[1] = Math.min(rectA.getBottom(), rectB.getBottom()) - Math.max(rectA.y, rectB.y);
+
   // update the overlapping amounts for the following cases:
   if (rectA.getX() <= rectB.getX() && rectA.getRight() >= rectB.getRight()) {
+    /* Case x.1:
+    *
+    * rectA
+    * 	|                       |
+    * 	|        _________      |
+    * 	|        |       |      |
+    * 	|________|_______|______|
+    * 			 |       |
+    *           |       |
+    *        rectB
+    */
     overlapAmount[0] += Math.min(rectB.getX() - rectA.getX(), rectA.getRight() - rectB.getRight());
   } else if (rectB.getX() <= rectA.getX() && rectB.getRight() >= rectA.getRight()) {
+    /* Case x.2:
+    *
+    * rectB
+    * 	|                       |
+    * 	|        _________      |
+    * 	|        |       |      |
+    * 	|________|_______|______|
+    * 			 |       |
+    *           |       |
+    *        rectA
+    */
     overlapAmount[0] += Math.min(rectA.getX() - rectB.getX(), rectB.getRight() - rectA.getRight());
   }
   if (rectA.getY() <= rectB.getY() && rectA.getBottom() >= rectB.getBottom()) {
+    /* Case y.1:
+     *          ________ rectA
+     *         |
+     *         |
+     *   ______|____  rectB
+     *         |    |
+     *         |    |
+     *   ______|____|
+     *         |
+     *         |
+     *         |________
+     *
+     */
     overlapAmount[1] += Math.min(rectB.getY() - rectA.getY(), rectA.getBottom() - rectB.getBottom());
   } else if (rectB.getY() <= rectA.getY() && rectB.getBottom() >= rectA.getBottom()) {
+    /* Case y.2:
+    *          ________ rectB
+    *         |
+    *         |
+    *   ______|____  rectA
+    *         |    |
+    *         |    |
+    *   ______|____|
+    *         |
+    *         |
+    *         |________
+    *
+    */
     overlapAmount[1] += Math.min(rectA.getY() - rectB.getY(), rectB.getBottom() - rectA.getBottom());
   }
 
   // find slope of the line passes two centers
   var slope = Math.abs((rectB.getCenterY() - rectA.getCenterY()) / (rectB.getCenterX() - rectA.getCenterX()));
   // if centers are overlapped
-  if (rectB.getCenterY() == rectA.getCenterY() && rectB.getCenterX() == rectA.getCenterX()) {
+  if (rectB.getCenterY() === rectA.getCenterY() && rectB.getCenterX() === rectA.getCenterX()) {
     // assume the slope is 1 (45 degree)
     slope = 1.0;
   }
@@ -1647,6 +1722,14 @@ IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separati
   overlapAmount[1] = -1 * directions[1] * (moveByY / 2 + separationBuffer);
 };
 
+/**
+ * This method decides the separation direction of overlapping nodes
+ *
+ * if directions[0] = -1, then rectA goes left
+ * if directions[0] = 1,  then rectA goes right
+ * if directions[1] = -1, then rectA goes up
+ * if directions[1] = 1,  then rectA goes down
+ */
 IGeometry.decideDirectionsForOverlappingNodes = function (rectA, rectB, directions) {
   if (rectA.getCenterX() < rectB.getCenterX()) {
     directions[0] = -1;
@@ -1661,6 +1744,12 @@ IGeometry.decideDirectionsForOverlappingNodes = function (rectA, rectB, directio
   }
 };
 
+/**
+ * This method calculates the intersection (clipping) points of the two
+ * input rectangles with line segment defined by the centers of these two
+ * rectangles. The clipping points are saved in the input double array and
+ * whether or not the two rectangles overlap is returned.
+ */
 IGeometry.getIntersection2 = function (rectA, rectB, result) {
   //result[0-1] will contain clipPoint of rectA, result[2-3] will contain clipPoint of rectB
   var p1x = rectA.getCenterX();
@@ -1694,12 +1783,13 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
   var bottomRightBx = rectB.getRight();
   var halfWidthB = rectB.getWidthHalf();
   var halfHeightB = rectB.getHeightHalf();
+
   //flag whether clipping points are found
   var clipPointAFound = false;
   var clipPointBFound = false;
 
   // line is vertical
-  if (p1x == p2x) {
+  if (p1x === p2x) {
     if (p1y > p2y) {
       result[0] = p1x;
       result[1] = topLeftAy;
@@ -1717,7 +1807,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
     }
   }
   // line is horizontal
-  else if (p1y == p2y) {
+  else if (p1y === p2y) {
       if (p1x > p2x) {
         result[0] = topLeftAx;
         result[1] = p1y;
@@ -1740,15 +1830,15 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
 
       //slope of line between center of rectA and center of rectB
       var slopePrime = (p2y - p1y) / (p2x - p1x);
-      var cardinalDirectionA;
-      var cardinalDirectionB;
-      var tempPointAx;
-      var tempPointAy;
-      var tempPointBx;
-      var tempPointBy;
+      var cardinalDirectionA = void 0;
+      var cardinalDirectionB = void 0;
+      var tempPointAx = void 0;
+      var tempPointAy = void 0;
+      var tempPointBx = void 0;
+      var tempPointBy = void 0;
 
       //determine whether clipping point is the corner of nodeA
-      if (-slopeA == slopePrime) {
+      if (-slopeA === slopePrime) {
         if (p1x > p2x) {
           result[0] = bottomLeftAx;
           result[1] = bottomLeftAy;
@@ -1758,7 +1848,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
           result[1] = topLeftAy;
           clipPointAFound = true;
         }
-      } else if (slopeA == slopePrime) {
+      } else if (slopeA === slopePrime) {
         if (p1x > p2x) {
           result[0] = topLeftAx;
           result[1] = topLeftAy;
@@ -1771,7 +1861,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
       }
 
       //determine whether clipping point is the corner of nodeB
-      if (-slopeB == slopePrime) {
+      if (-slopeB === slopePrime) {
         if (p2x > p1x) {
           result[2] = bottomLeftBx;
           result[3] = bottomLeftBy;
@@ -1781,7 +1871,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
           result[3] = topLeftBy;
           clipPointBFound = true;
         }
-      } else if (slopeB == slopePrime) {
+      } else if (slopeB === slopePrime) {
         if (p2x > p1x) {
           result[2] = topLeftBx;
           result[3] = topLeftBy;
@@ -1801,19 +1891,19 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
       //determine Cardinal Direction of rectangles
       if (p1x > p2x) {
         if (p1y > p2y) {
-          cardinalDirectionA = IGeometry.getCardinalDirection(slopeA, slopePrime, 4);
-          cardinalDirectionB = IGeometry.getCardinalDirection(slopeB, slopePrime, 2);
+          cardinalDirectionA = this.getCardinalDirection(slopeA, slopePrime, 4);
+          cardinalDirectionB = this.getCardinalDirection(slopeB, slopePrime, 2);
         } else {
-          cardinalDirectionA = IGeometry.getCardinalDirection(-slopeA, slopePrime, 3);
-          cardinalDirectionB = IGeometry.getCardinalDirection(-slopeB, slopePrime, 1);
+          cardinalDirectionA = this.getCardinalDirection(-slopeA, slopePrime, 3);
+          cardinalDirectionB = this.getCardinalDirection(-slopeB, slopePrime, 1);
         }
       } else {
         if (p1y > p2y) {
-          cardinalDirectionA = IGeometry.getCardinalDirection(-slopeA, slopePrime, 1);
-          cardinalDirectionB = IGeometry.getCardinalDirection(-slopeB, slopePrime, 3);
+          cardinalDirectionA = this.getCardinalDirection(-slopeA, slopePrime, 1);
+          cardinalDirectionB = this.getCardinalDirection(-slopeB, slopePrime, 3);
         } else {
-          cardinalDirectionA = IGeometry.getCardinalDirection(slopeA, slopePrime, 2);
-          cardinalDirectionB = IGeometry.getCardinalDirection(slopeB, slopePrime, 4);
+          cardinalDirectionA = this.getCardinalDirection(slopeA, slopePrime, 2);
+          cardinalDirectionB = this.getCardinalDirection(slopeB, slopePrime, 4);
         }
       }
       //calculate clipping Point if it is not found before
@@ -1877,6 +1967,13 @@ IGeometry.getIntersection2 = function (rectA, rectB, result) {
   return false;
 };
 
+/**
+ * This method returns in which cardinal direction does input point stays
+ * 1: North
+ * 2: East
+ * 3: South
+ * 4: West
+ */
 IGeometry.getCardinalDirection = function (slope, slopePrime, line) {
   if (slope > slopePrime) {
     return line;
@@ -1885,10 +1982,15 @@ IGeometry.getCardinalDirection = function (slope, slopePrime, line) {
   }
 };
 
+/**
+ * This method calculates the intersection of the two lines defined by
+ * point pairs (s1,s2) and (f1,f2).
+ */
 IGeometry.getIntersection = function (s1, s2, f1, f2) {
   if (f2 == null) {
-    return IGeometry.getIntersection2(s1, s2, f1);
+    return this.getIntersection2(s1, s2, f1);
   }
+
   var x1 = s1.x;
   var y1 = s1.y;
   var x2 = s2.x;
@@ -1897,9 +1999,15 @@ IGeometry.getIntersection = function (s1, s2, f1, f2) {
   var y3 = f1.y;
   var x4 = f2.x;
   var y4 = f2.y;
-  var x, y; // intersection point
-  var a1, a2, b1, b2, c1, c2; // coefficients of line eqns.
-  var denom;
+  var x = void 0,
+      y = void 0; // intersection point
+  var a1 = void 0,
+      a2 = void 0,
+      b1 = void 0,
+      b2 = void 0,
+      c1 = void 0,
+      c2 = void 0; // coefficients of line eqns.
+  var denom = void 0;
 
   a1 = y2 - y1;
   b1 = x1 - x2;
@@ -1911,7 +2019,7 @@ IGeometry.getIntersection = function (s1, s2, f1, f2) {
 
   denom = a1 * b2 - a2 * b1;
 
-  if (denom == 0) {
+  if (denom === 0) {
     return null;
   }
 
@@ -1919,6 +2027,55 @@ IGeometry.getIntersection = function (s1, s2, f1, f2) {
   y = (a2 * c1 - a1 * c2) / denom;
 
   return new Point(x, y);
+};
+
+/**
+ * This method finds and returns the angle of the vector from the + x-axis
+ * in clockwise direction (compatible w/ Java coordinate system!).
+ */
+IGeometry.angleOfVector = function (Cx, Cy, Nx, Ny) {
+  var C_angle = void 0;
+
+  if (Cx !== Nx) {
+    C_angle = Math.atan((Ny - Cy) / (Nx - Cx));
+
+    if (Nx < Cx) {
+      C_angle += Math.PI;
+    } else if (Ny < Cy) {
+      C_angle += this.TWO_PI;
+    }
+  } else if (Ny < Cy) {
+    C_angle = this.ONE_AND_HALF_PI; // 270 degrees
+  } else {
+    C_angle = this.HALF_PI; // 90 degrees
+  }
+
+  return C_angle;
+};
+
+/**
+ * This method checks whether the given two line segments (one with point
+ * p1 and p2, the other with point p3 and p4) intersect at a point other
+ * than these points.
+ */
+IGeometry.doIntersect = function (p1, p2, p3, p4) {
+  var a = p1.x;
+  var b = p1.y;
+  var c = p2.x;
+  var d = p2.y;
+  var p = p3.x;
+  var q = p3.y;
+  var r = p4.x;
+  var s = p4.y;
+  var det = (c - a) * (s - q) - (r - p) * (d - b);
+
+  if (det === 0) {
+    return false;
+  } else {
+    var lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    var gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -2157,6 +2314,83 @@ module.exports = LinkedList;
 "use strict";
 
 
+/*
+ *This class is the javascript implementation of the Point.java class in jdk
+ */
+function Point(x, y, p) {
+  this.x = null;
+  this.y = null;
+  if (x == null && y == null && p == null) {
+    this.x = 0;
+    this.y = 0;
+  } else if (typeof x == 'number' && typeof y == 'number' && p == null) {
+    this.x = x;
+    this.y = y;
+  } else if (x.constructor.name == 'Point' && y == null && p == null) {
+    p = x;
+    this.x = p.x;
+    this.y = p.y;
+  }
+}
+
+Point.prototype.getX = function () {
+  return this.x;
+};
+
+Point.prototype.getY = function () {
+  return this.y;
+};
+
+Point.prototype.getLocation = function () {
+  return new Point(this.x, this.y);
+};
+
+Point.prototype.setLocation = function (x, y, p) {
+  if (x.constructor.name == 'Point' && y == null && p == null) {
+    p = x;
+    this.setLocation(p.x, p.y);
+  } else if (typeof x == 'number' && typeof y == 'number' && p == null) {
+    //if both parameters are integer just move (x,y) location
+    if (parseInt(x) == x && parseInt(y) == y) {
+      this.move(x, y);
+    } else {
+      this.x = Math.floor(x + 0.5);
+      this.y = Math.floor(y + 0.5);
+    }
+  }
+};
+
+Point.prototype.move = function (x, y) {
+  this.x = x;
+  this.y = y;
+};
+
+Point.prototype.translate = function (dx, dy) {
+  this.x += dx;
+  this.y += dy;
+};
+
+Point.prototype.equals = function (obj) {
+  if (obj.constructor.name == "Point") {
+    var pt = obj;
+    return this.x == pt.x && this.y == pt.y;
+  }
+  return this == obj;
+};
+
+Point.prototype.toString = function () {
+  return new Point().constructor.name + "[x=" + this.x + ",y=" + this.y + "]";
+};
+
+module.exports = Point;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 function RectangleD(x, y, width, height) {
   this.x = 0;
   this.y = 0;
@@ -2266,7 +2500,7 @@ RectangleD.prototype.getHeightHalf = function () {
 module.exports = RectangleD;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2303,7 +2537,7 @@ UniqueIDGeneretor.isPrimitive = function (arg) {
 module.exports = UniqueIDGeneretor;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2318,7 +2552,7 @@ var LEdge = __webpack_require__(1);
 var LGraph = __webpack_require__(5);
 var PointD = __webpack_require__(4);
 var Transform = __webpack_require__(17);
-var Emitter = __webpack_require__(26);
+var Emitter = __webpack_require__(27);
 
 function Layout(isRemoteUse) {
   Emitter.call(this);
@@ -2907,83 +3141,6 @@ Layout.prototype.setGraphManager = function (gm) {
 module.exports = Layout;
 
 /***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/*
- *This class is the javascript implementation of the Point.java class in jdk
- */
-function Point(x, y, p) {
-  this.x = null;
-  this.y = null;
-  if (x == null && y == null && p == null) {
-    this.x = 0;
-    this.y = 0;
-  } else if (typeof x == 'number' && typeof y == 'number' && p == null) {
-    this.x = x;
-    this.y = y;
-  } else if (x.constructor.name == 'Point' && y == null && p == null) {
-    p = x;
-    this.x = p.x;
-    this.y = p.y;
-  }
-}
-
-Point.prototype.getX = function () {
-  return this.x;
-};
-
-Point.prototype.getY = function () {
-  return this.y;
-};
-
-Point.prototype.getLocation = function () {
-  return new Point(this.x, this.y);
-};
-
-Point.prototype.setLocation = function (x, y, p) {
-  if (x.constructor.name == 'Point' && y == null && p == null) {
-    p = x;
-    this.setLocation(p.x, p.y);
-  } else if (typeof x == 'number' && typeof y == 'number' && p == null) {
-    //if both parameters are integer just move (x,y) location
-    if (parseInt(x) == x && parseInt(y) == y) {
-      this.move(x, y);
-    } else {
-      this.x = Math.floor(x + 0.5);
-      this.y = Math.floor(y + 0.5);
-    }
-  }
-};
-
-Point.prototype.move = function (x, y) {
-  this.x = x;
-  this.y = y;
-};
-
-Point.prototype.translate = function (dx, dy) {
-  this.x += dx;
-  this.y += dy;
-};
-
-Point.prototype.equals = function (obj) {
-  if (obj.constructor.name == "Point") {
-    var pt = obj;
-    return this.x == pt.x && this.y == pt.y;
-  }
-  return this == obj;
-};
-
-Point.prototype.toString = function () {
-  return new Point().constructor.name + "[x=" + this.x + ",y=" + this.y + "]";
-};
-
-module.exports = Point;
-
-/***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3142,7 +3299,7 @@ module.exports = Transform;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var Layout = __webpack_require__(14);
+var Layout = __webpack_require__(15);
 var FDLayoutConstants = __webpack_require__(7);
 var LayoutConstants = __webpack_require__(0);
 var IGeometry = __webpack_require__(8);
@@ -3716,7 +3873,7 @@ module.exports = DimensionD;
 "use strict";
 
 
-var UniqueIDGeneretor = __webpack_require__(13);
+var UniqueIDGeneretor = __webpack_require__(14);
 
 function HashMap() {
   this.map = {};
@@ -3754,7 +3911,7 @@ module.exports = HashMap;
 "use strict";
 
 
-var UniqueIDGeneretor = __webpack_require__(13);
+var UniqueIDGeneretor = __webpack_require__(14);
 
 function HashSet() {
   this.set = {};
@@ -3816,110 +3973,279 @@ module.exports = HashSet;
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * A classic Quicksort algorithm with Hoare's partition
+ * - Works also on LinkedList objects
+ *
+ * Copyright: i-Vis Research Group, Bilkent University, 2007 - present
+ */
+
 var LinkedList = __webpack_require__(11);
 
-function Quicksort() {}
+var Quicksort = function () {
+    function Quicksort(A, compareFunction) {
+        _classCallCheck(this, Quicksort);
 
-Quicksort.get_object_at = function (list, i) {
-    if (list instanceof Array) {
-        return list[i];
-    } else if (list instanceof LinkedList) {
-        return list.get_object_at(i);
-    }
-};
+        if (compareFunction !== null || compareFunction !== undefined) this.compareFunction = this._defaultCompareFunction;
 
-Quicksort.set_object_at = function (list, i, value) {
-    if (list instanceof Array) {
-        list[i] = value;
-    } else if (list instanceof LinkedList) {
-        list.set_object_at(i, value);
-    }
-};
+        var length = void 0;
+        if (A instanceof LinkedList) length = A.size();else length = A.length;
 
-Quicksort.quicksort = function (list, comparison_fn) {
-
-    // input must be an instance of LinkedList class or must be an array in order to sort
-    if (!(list instanceof LinkedList || list instanceof Array)) {
-        return;
+        this._quicksort(A, 0, length - 1);
     }
 
-    var comparison_function = comparison_fn;
-
-    if (comparison_function === undefined) {
-        comparison_function = Quicksort.compare;
-    }
-    var end_index;
-
-    if (list instanceof LinkedList) {
-        end_index = list.size();
-    } else if (list instanceof Array) {
-        end_index = list.length - 1;
-    }
-
-    // Prevent empty lists or arrays.
-    if (end_index >= 0) {
-        Quicksort.quicksort_between_indices(list, 0, end_index, comparison_function);
-    }
-};
-
-Quicksort.quicksort_between_indices = function (list, low, high, comparison_fn) {
-
-    // input must be an instance of LinkedList class or must be an array in order to sort
-    if (!(list instanceof LinkedList || list instanceof Array)) {
-        return;
-    }
-
-    if (comparison_fn === undefined) {
-        comparison_fn = Quicksort.compare;
-    }
-
-    var i = low;
-    var j = high;
-    var middleIndex = Math.floor((i + j) / 2);
-    var middle = Quicksort.get_object_at(list, middleIndex);
-
-    do {
-
-        while (comparison_fn(Quicksort.get_object_at(list, i), middle)) {
-
-            i++;
+    _createClass(Quicksort, [{
+        key: '_quicksort',
+        value: function _quicksort(A, p, r) {
+            if (p < r) {
+                var q = this._partition(A, p, r);
+                this._quicksort(A, p, q);
+                this._quicksort(A, q + 1, r);
+            }
         }
-
-        while (comparison_fn(middle, Quicksort.get_object_at(list, j))) {
-
-            j--;
+    }, {
+        key: '_partition',
+        value: function _partition(A, p, r) {
+            var x = this._get(A, p);
+            var i = p;
+            var j = r;
+            while (true) {
+                while (this.compareFunction(x, this._get(A, j))) {
+                    j--;
+                }while (this.compareFunction(this._get(A, i), x)) {
+                    i++;
+                }if (i < j) {
+                    this._swap(A, i, j);
+                    i++;
+                    j--;
+                } else return j;
+            }
         }
-
-        if (i <= j) {
-
-            var temp = Quicksort.get_object_at(list, i);
-            Quicksort.set_object_at(list, i, Quicksort.get_object_at(list, j));
-            Quicksort.set_object_at(list, j, temp);
-            i++;
-            j--;
+    }, {
+        key: '_get',
+        value: function _get(object, index) {
+            if (object instanceof LinkedList) return object.get_object_at(index);else return object[index];
         }
-    } while (i <= j);
+    }, {
+        key: '_set',
+        value: function _set(object, index, value) {
+            if (object instanceof LinkedList) object.set_object_at(index, value);else object[index] = value;
+        }
+    }, {
+        key: '_swap',
+        value: function _swap(A, i, j) {
+            var temp = this._get(A, i);
+            this._set(A, i, this._get(A, j));
+            this._set(A, j, temp);
+        }
+    }, {
+        key: '_defaultCompareFunction',
+        value: function _defaultCompareFunction(a, b) {
+            return b > a;
+        }
+    }]);
 
-    if (low < j) {
-
-        Quicksort.quicksort_between_indices(list, low, j, comparison_fn);
-    }
-
-    if (high > i) {
-
-        Quicksort.quicksort_between_indices(list, i, high, comparison_fn);
-    }
-};
-
-// this function must be overriden for sorting different data types(e.g. string, integer etc.)
-Quicksort.compare = function (a, b) {
-    return b > a;
-};
+    return Quicksort;
+}();
 
 module.exports = Quicksort;
 
 /***/ }),
 /* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *   Needleman-Wunsch algorithm is an procedure to compute the optimal global alignment of two string
+ *   sequences by S.B.Needleman and C.D.Wunsch (1970).
+ *
+ *   Aside from the inputs, you can assign the scores for,
+ *   - Match: The two characters at the current index are same.
+ *   - Mismatch: The two characters at the current index are different.
+ *   - Insertion/Deletion(gaps): The best alignment involves one letter aligning to a gap in the other string.
+ */
+
+var NeedlemanWunsch = function () {
+    function NeedlemanWunsch(sequence1, sequence2) {
+        var match_score = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+        var mismatch_penalty = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : -1;
+        var gap_penalty = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : -1;
+
+        _classCallCheck(this, NeedlemanWunsch);
+
+        this.sequence1 = sequence1;
+        this.sequence2 = sequence2;
+        this.match_score = match_score;
+        this.mismatch_penalty = mismatch_penalty;
+        this.gap_penalty = gap_penalty;
+
+        // Just the remove redundancy
+        this.iMax = sequence1.length + 1;
+        this.jMax = sequence2.length + 1;
+
+        // Grid matrix of scores
+        this.grid = new Array(this.iMax);
+        for (var i = 0; i < this.iMax; i++) {
+            this.grid[i] = new Array(this.jMax);
+
+            for (var j = 0; j < this.jMax; j++) {
+                this.grid[i][j] = 0;
+            }
+        }
+
+        // Traceback matrix (2D array, each cell is an array of boolean values for [`Diag`, `Up`, `Left`] positions)
+        this.tracebackGrid = new Array(this.iMax);
+        for (var _i = 0; _i < this.iMax; _i++) {
+            this.tracebackGrid[_i] = new Array(this.jMax);
+
+            for (var _j = 0; _j < this.jMax; _j++) {
+                this.tracebackGrid[_i][_j] = [null, null, null];
+            }
+        }
+
+        // The aligned sequences (return multiple possibilities)
+        this.alignments = [];
+
+        // Final alignment score
+        this.score = -1;
+
+        // Calculate scores and tracebacks
+        this.computeGrids();
+    }
+
+    _createClass(NeedlemanWunsch, [{
+        key: "getScore",
+        value: function getScore() {
+            return this.score;
+        }
+    }, {
+        key: "getAlignments",
+        value: function getAlignments() {
+            return this.alignments;
+        }
+
+        // Main dynamic programming procedure
+
+    }, {
+        key: "computeGrids",
+        value: function computeGrids() {
+            // Fill in the first row
+            for (var j = 1; j < this.jMax; j++) {
+                this.grid[0][j] = this.grid[0][j - 1] + this.gap_penalty;
+                this.tracebackGrid[0][j] = [false, false, true];
+            }
+
+            // Fill in the first column
+            for (var i = 1; i < this.iMax; i++) {
+                this.grid[i][0] = this.grid[i - 1][0] + this.gap_penalty;
+                this.tracebackGrid[i][0] = [false, true, false];
+            }
+
+            // Fill the rest of the grid
+            for (var _i2 = 1; _i2 < this.iMax; _i2++) {
+                for (var _j2 = 1; _j2 < this.jMax; _j2++) {
+                    // Find the max score(s) among [`Diag`, `Up`, `Left`]
+                    var diag = void 0;
+                    if (this.sequence1[_i2 - 1] === this.sequence2[_j2 - 1]) diag = this.grid[_i2 - 1][_j2 - 1] + this.match_score;else diag = this.grid[_i2 - 1][_j2 - 1] + this.mismatch_penalty;
+
+                    var up = this.grid[_i2 - 1][_j2] + this.gap_penalty;
+                    var left = this.grid[_i2][_j2 - 1] + this.gap_penalty;
+
+                    // If there exists multiple max values, capture them for multiple paths
+                    var maxOf = [diag, up, left];
+                    var indices = this.arrayAllMaxIndexes(maxOf);
+
+                    // Update Grids
+                    this.grid[_i2][_j2] = maxOf[indices[0]];
+                    this.tracebackGrid[_i2][_j2] = [indices.includes(0), indices.includes(1), indices.includes(2)];
+                }
+            }
+
+            // Update alignment score
+            this.score = this.grid[this.iMax - 1][this.jMax - 1];
+        }
+
+        // Gets all possible valid sequence combinations
+
+    }, {
+        key: "alignmentTraceback",
+        value: function alignmentTraceback() {
+            var inProcessAlignments = [];
+
+            inProcessAlignments.push({ pos: [this.sequence1.length, this.sequence2.length],
+                seq1: "",
+                seq2: ""
+            });
+
+            while (inProcessAlignments[0]) {
+                var current = inProcessAlignments[0];
+                var directions = this.tracebackGrid[current.pos[0]][current.pos[1]];
+
+                if (directions[0]) {
+                    inProcessAlignments.push({ pos: [current.pos[0] - 1, current.pos[1] - 1],
+                        seq1: this.sequence1[current.pos[0] - 1] + current.seq1,
+                        seq2: this.sequence2[current.pos[1] - 1] + current.seq2
+                    });
+                }
+                if (directions[1]) {
+                    inProcessAlignments.push({ pos: [current.pos[0] - 1, current.pos[1]],
+                        seq1: this.sequence1[current.pos[0] - 1] + current.seq1,
+                        seq2: '-' + current.seq2
+                    });
+                }
+                if (directions[2]) {
+                    inProcessAlignments.push({ pos: [current.pos[0], current.pos[1] - 1],
+                        seq1: '-' + current.seq1,
+                        seq2: this.sequence2[current.pos[1] - 1] + current.seq2
+                    });
+                }
+
+                if (current.pos[0] === 0 && current.pos[1] === 0) this.alignments.push({ sequence1: current.seq1,
+                    sequence2: current.seq2
+                });
+
+                inProcessAlignments.shift();
+            }
+
+            return this.alignments;
+        }
+
+        // Helper Functions
+
+    }, {
+        key: "getAllIndexes",
+        value: function getAllIndexes(arr, val) {
+            var indexes = [],
+                i = -1;
+            while ((i = arr.indexOf(val, i + 1)) !== -1) {
+                indexes.push(i);
+            }
+            return indexes;
+        }
+    }, {
+        key: "arrayAllMaxIndexes",
+        value: function arrayAllMaxIndexes(array) {
+            return this.getAllIndexes(array, Math.max.apply(null, array));
+        }
+    }]);
+
+    return NeedlemanWunsch;
+}();
+
+module.exports = NeedlemanWunsch;
+
+/***/ }),
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3939,12 +4265,12 @@ layoutBase.HashSet = __webpack_require__(23);
 layoutBase.IGeometry = __webpack_require__(8);
 layoutBase.IMath = __webpack_require__(9);
 layoutBase.Integer = __webpack_require__(10);
-layoutBase.Point = __webpack_require__(15);
+layoutBase.Point = __webpack_require__(12);
 layoutBase.PointD = __webpack_require__(4);
 layoutBase.RandomSeed = __webpack_require__(16);
-layoutBase.RectangleD = __webpack_require__(12);
+layoutBase.RectangleD = __webpack_require__(13);
 layoutBase.Transform = __webpack_require__(17);
-layoutBase.UniqueIDGeneretor = __webpack_require__(13);
+layoutBase.UniqueIDGeneretor = __webpack_require__(14);
 layoutBase.Quicksort = __webpack_require__(24);
 layoutBase.LinkedList = __webpack_require__(11);
 layoutBase.LGraphObject = __webpack_require__(2);
@@ -3952,13 +4278,14 @@ layoutBase.LGraph = __webpack_require__(5);
 layoutBase.LEdge = __webpack_require__(1);
 layoutBase.LGraphManager = __webpack_require__(6);
 layoutBase.LNode = __webpack_require__(3);
-layoutBase.Layout = __webpack_require__(14);
+layoutBase.Layout = __webpack_require__(15);
 layoutBase.LayoutConstants = __webpack_require__(0);
+layoutBase.NeedlemanWunsch = __webpack_require__(25);
 
 module.exports = layoutBase;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

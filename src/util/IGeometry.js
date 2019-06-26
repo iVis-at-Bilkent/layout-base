@@ -1,52 +1,121 @@
+/**
+ * This class maintains a list of static geometry related utility methods.
+ *
+ *
+ * Copyright: i-Vis Research Group, Bilkent University, 2007 - present
+ */
+
+const Point = require('./Point');
+
 function IGeometry() {
+
 }
 
+/**
+ * This method calculates *half* the amount in x and y directions of the two
+ * input rectangles needed to separate them keeping their respective
+ * positioning, and returns the result in the input array. An input
+ * separation buffer added to the amount in both directions. We assume that
+ * the two rectangles do intersect.
+ */
 IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separationBuffer)
 {
   if (!rectA.intersects(rectB)) {
     throw "assert failed";
   }
-  var directions = new Array(2);
-  IGeometry.decideDirectionsForOverlappingNodes(rectA, rectB, directions);
+
+  let directions = new Array(2);
+
+  this.decideDirectionsForOverlappingNodes(rectA, rectB, directions);
+
   overlapAmount[0] = Math.min(rectA.getRight(), rectB.getRight()) -
-          Math.max(rectA.x, rectB.x);
+      Math.max(rectA.x, rectB.x);
   overlapAmount[1] = Math.min(rectA.getBottom(), rectB.getBottom()) -
-          Math.max(rectA.y, rectB.y);
+      Math.max(rectA.y, rectB.y);
+
   // update the overlapping amounts for the following cases:
   if ((rectA.getX() <= rectB.getX()) && (rectA.getRight() >= rectB.getRight()))
   {
+    /* Case x.1:
+    *
+    * rectA
+    * 	|                       |
+    * 	|        _________      |
+    * 	|        |       |      |
+    * 	|________|_______|______|
+    * 			 |       |
+    *           |       |
+    *        rectB
+    */
     overlapAmount[0] += Math.min((rectB.getX() - rectA.getX()),
-            (rectA.getRight() - rectB.getRight()));
+        (rectA.getRight() - rectB.getRight()));
   }
   else if ((rectB.getX() <= rectA.getX()) && (rectB.getRight() >= rectA.getRight()))
   {
+    /* Case x.2:
+    *
+    * rectB
+    * 	|                       |
+    * 	|        _________      |
+    * 	|        |       |      |
+    * 	|________|_______|______|
+    * 			 |       |
+    *           |       |
+    *        rectA
+    */
     overlapAmount[0] += Math.min((rectA.getX() - rectB.getX()),
-            (rectB.getRight() - rectA.getRight()));
+        (rectB.getRight() - rectA.getRight()));
   }
   if ((rectA.getY() <= rectB.getY()) && (rectA.getBottom() >= rectB.getBottom()))
   {
+    /* Case y.1:
+     *          ________ rectA
+     *         |
+     *         |
+     *   ______|____  rectB
+     *         |    |
+     *         |    |
+     *   ______|____|
+     *         |
+     *         |
+     *         |________
+     *
+     */
     overlapAmount[1] += Math.min((rectB.getY() - rectA.getY()),
-            (rectA.getBottom() - rectB.getBottom()));
+        (rectA.getBottom() - rectB.getBottom()));
   }
   else if ((rectB.getY() <= rectA.getY()) && (rectB.getBottom() >= rectA.getBottom()))
   {
+    /* Case y.2:
+    *          ________ rectB
+    *         |
+    *         |
+    *   ______|____  rectA
+    *         |    |
+    *         |    |
+    *   ______|____|
+    *         |
+    *         |
+    *         |________
+    *
+ */
     overlapAmount[1] += Math.min((rectA.getY() - rectB.getY()),
-            (rectB.getBottom() - rectA.getBottom()));
+        (rectB.getBottom() - rectA.getBottom()));
   }
 
   // find slope of the line passes two centers
-  var slope = Math.abs((rectB.getCenterY() - rectA.getCenterY()) /
-          (rectB.getCenterX() - rectA.getCenterX()));
+  let slope = Math.abs((rectB.getCenterY() - rectA.getCenterY()) /
+      (rectB.getCenterX() - rectA.getCenterX()));
   // if centers are overlapped
-  if ((rectB.getCenterY() == rectA.getCenterY()) &&
-          (rectB.getCenterX() == rectA.getCenterX()))
+  if ((rectB.getCenterY() === rectA.getCenterY()) &&
+      (rectB.getCenterX() === rectA.getCenterX()))
   {
     // assume the slope is 1 (45 degree)
     slope = 1.0;
   }
 
-  var moveByY = slope * overlapAmount[0];
-  var moveByX = overlapAmount[1] / slope;
+  let moveByY = slope * overlapAmount[0];
+  let moveByX = overlapAmount[1] / slope;
   if (overlapAmount[0] < moveByX)
   {
     moveByX = overlapAmount[0];
@@ -59,8 +128,16 @@ IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separati
   // amounts in opposite directions, overlap will be resolved
   overlapAmount[0] = -1 * directions[0] * ((moveByX / 2) + separationBuffer);
   overlapAmount[1] = -1 * directions[1] * ((moveByY / 2) + separationBuffer);
-}
+};
 
+/**
+ * This method decides the separation direction of overlapping nodes
+ *
+ * if directions[0] = -1, then rectA goes left
+ * if directions[0] = 1,  then rectA goes right
+ * if directions[1] = -1, then rectA goes up
+ * if directions[1] = 1,  then rectA goes down
+ */
 IGeometry.decideDirectionsForOverlappingNodes = function (rectA, rectB, directions)
 {
   if (rectA.getCenterX() < rectB.getCenterX())
@@ -80,15 +157,21 @@ IGeometry.decideDirectionsForOverlappingNodes = function (rectA, rectB, directio
   {
     directions[1] = 1;
   }
-}
+};
 
-IGeometry.getIntersection2 = function (rectA, rectB, result)
+/**
+ * This method calculates the intersection (clipping) points of the two
+ * input rectangles with line segment defined by the centers of these two
+ * rectangles. The clipping points are saved in the input double array and
+ * whether or not the two rectangles overlap is returned.
+ */
+IGeometry.getIntersection2 = function(rectA, rectB, result)
 {
   //result[0-1] will contain clipPoint of rectA, result[2-3] will contain clipPoint of rectB
-  var p1x = rectA.getCenterX();
-  var p1y = rectA.getCenterY();
-  var p2x = rectB.getCenterX();
-  var p2y = rectB.getCenterY();
+  let p1x = rectA.getCenterX();
+  let p1y = rectA.getCenterY();
+  let p2x = rectB.getCenterX();
+  let p2y = rectB.getCenterY();
 
   //if two rectangles intersect, then clipping points are centers
   if (rectA.intersects(rectB))
@@ -100,29 +183,30 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
     return true;
   }
   //variables for rectA
-  var topLeftAx = rectA.getX();
-  var topLeftAy = rectA.getY();
-  var topRightAx = rectA.getRight();
-  var bottomLeftAx = rectA.getX();
-  var bottomLeftAy = rectA.getBottom();
-  var bottomRightAx = rectA.getRight();
-  var halfWidthA = rectA.getWidthHalf();
-  var halfHeightA = rectA.getHeightHalf();
+  let topLeftAx = rectA.getX();
+  let topLeftAy = rectA.getY();
+  let topRightAx = rectA.getRight();
+  let bottomLeftAx = rectA.getX();
+  let bottomLeftAy = rectA.getBottom();
+  let bottomRightAx = rectA.getRight();
+  let halfWidthA = rectA.getWidthHalf();
+  let halfHeightA = rectA.getHeightHalf();
   //variables for rectB
-  var topLeftBx = rectB.getX();
-  var topLeftBy = rectB.getY();
-  var topRightBx = rectB.getRight();
-  var bottomLeftBx = rectB.getX();
-  var bottomLeftBy = rectB.getBottom();
-  var bottomRightBx = rectB.getRight();
-  var halfWidthB = rectB.getWidthHalf();
-  var halfHeightB = rectB.getHeightHalf();
+  let topLeftBx = rectB.getX();
+  let topLeftBy = rectB.getY();
+  let topRightBx = rectB.getRight();
+  let bottomLeftBx = rectB.getX();
+  let bottomLeftBy = rectB.getBottom();
+  let bottomRightBx = rectB.getRight();
+  let halfWidthB = rectB.getWidthHalf();
+  let halfHeightB = rectB.getHeightHalf();
+
   //flag whether clipping points are found
-  var clipPointAFound = false;
-  var clipPointBFound = false;
+  let clipPointAFound = false;
+  let clipPointBFound = false;
 
   // line is vertical
-  if (p1x == p2x)
+  if (p1x === p2x)
   {
     if (p1y > p2y)
     {
@@ -146,7 +230,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
     }
   }
   // line is horizontal
-  else if (p1y == p2y)
+  else if (p1y === p2y)
   {
     if (p1x > p2x)
     {
@@ -172,20 +256,20 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
   else
   {
     //slopes of rectA's and rectB's diagonals
-    var slopeA = rectA.height / rectA.width;
-    var slopeB = rectB.height / rectB.width;
+    let slopeA = rectA.height / rectA.width;
+    let slopeB = rectB.height / rectB.width;
 
     //slope of line between center of rectA and center of rectB
-    var slopePrime = (p2y - p1y) / (p2x - p1x);
-    var cardinalDirectionA;
-    var cardinalDirectionB;
-    var tempPointAx;
-    var tempPointAy;
-    var tempPointBx;
-    var tempPointBy;
+    let slopePrime = (p2y - p1y) / (p2x - p1x);
+    let cardinalDirectionA;
+    let cardinalDirectionB;
+    let tempPointAx;
+    let tempPointAy;
+    let tempPointBx;
+    let tempPointBy;
 
     //determine whether clipping point is the corner of nodeA
-    if ((-slopeA) == slopePrime)
+    if ((-slopeA) === slopePrime)
     {
       if (p1x > p2x)
       {
@@ -200,7 +284,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
         clipPointAFound = true;
       }
     }
-    else if (slopeA == slopePrime)
+    else if (slopeA === slopePrime)
     {
       if (p1x > p2x)
       {
@@ -217,7 +301,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
     }
 
     //determine whether clipping point is the corner of nodeB
-    if ((-slopeB) == slopePrime)
+    if ((-slopeB) === slopePrime)
     {
       if (p2x > p1x)
       {
@@ -232,7 +316,7 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
         clipPointBFound = true;
       }
     }
-    else if (slopeB == slopePrime)
+    else if (slopeB === slopePrime)
     {
       if (p2x > p1x)
       {
@@ -259,26 +343,26 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
     {
       if (p1y > p2y)
       {
-        cardinalDirectionA = IGeometry.getCardinalDirection(slopeA, slopePrime, 4);
-        cardinalDirectionB = IGeometry.getCardinalDirection(slopeB, slopePrime, 2);
+        cardinalDirectionA = this.getCardinalDirection(slopeA, slopePrime, 4);
+        cardinalDirectionB = this.getCardinalDirection(slopeB, slopePrime, 2);
       }
       else
       {
-        cardinalDirectionA = IGeometry.getCardinalDirection(-slopeA, slopePrime, 3);
-        cardinalDirectionB = IGeometry.getCardinalDirection(-slopeB, slopePrime, 1);
+        cardinalDirectionA = this.getCardinalDirection(-slopeA, slopePrime, 3);
+        cardinalDirectionB = this.getCardinalDirection(-slopeB, slopePrime, 1);
       }
     }
     else
     {
       if (p1y > p2y)
       {
-        cardinalDirectionA = IGeometry.getCardinalDirection(-slopeA, slopePrime, 1);
-        cardinalDirectionB = IGeometry.getCardinalDirection(-slopeB, slopePrime, 3);
+        cardinalDirectionA = this.getCardinalDirection(-slopeA, slopePrime, 1);
+        cardinalDirectionB = this.getCardinalDirection(-slopeB, slopePrime, 3);
       }
       else
       {
-        cardinalDirectionA = IGeometry.getCardinalDirection(slopeA, slopePrime, 2);
-        cardinalDirectionB = IGeometry.getCardinalDirection(slopeB, slopePrime, 4);
+        cardinalDirectionA = this.getCardinalDirection(slopeA, slopePrime, 2);
+        cardinalDirectionB = this.getCardinalDirection(slopeB, slopePrime, 4);
       }
     }
     //calculate clipping Point if it is not found before
@@ -344,8 +428,15 @@ IGeometry.getIntersection2 = function (rectA, rectB, result)
     }
   }
   return false;
-}
+};
 
+/**
+ * This method returns in which cardinal direction does input point stays
+ * 1: North
+ * 2: East
+ * 3: South
+ * 4: West
+ */
 IGeometry.getCardinalDirection = function (slope, slopePrime, line)
 {
   if (slope > slopePrime)
@@ -356,24 +447,29 @@ IGeometry.getCardinalDirection = function (slope, slopePrime, line)
   {
     return 1 + line % 4;
   }
-}
+};
 
-IGeometry.getIntersection = function (s1, s2, f1, f2)
+/**
+ * This method calculates the intersection of the two lines defined by
+ * point pairs (s1,s2) and (f1,f2).
+ */
+IGeometry.getIntersection = function(s1, s2, f1, f2)
 {
   if (f2 == null) {
-    return IGeometry.getIntersection2(s1, s2, f1);
+    return this.getIntersection2(s1, s2, f1);
   }
-  var x1 = s1.x;
-  var y1 = s1.y;
-  var x2 = s2.x;
-  var y2 = s2.y;
-  var x3 = f1.x;
-  var y3 = f1.y;
-  var x4 = f2.x;
-  var y4 = f2.y;
-  var x, y; // intersection point
-  var a1, a2, b1, b2, c1, c2; // coefficients of line eqns.
-  var denom;
+
+  let x1 = s1.x;
+  let y1 = s1.y;
+  let x2 = s2.x;
+  let y2 = s2.y;
+  let x3 = f1.x;
+  let y3 = f1.y;
+  let x4 = f2.x;
+  let y4 = f2.y;
+  let x, y; // intersection point
+  let a1, a2, b1, b2, c1, c2; // coefficients of line eqns.
+  let denom;
 
   a1 = y2 - y1;
   b1 = x1 - x2;
@@ -385,7 +481,7 @@ IGeometry.getIntersection = function (s1, s2, f1, f2)
 
   denom = a1 * b2 - a2 * b1;
 
-  if (denom == 0)
+  if (denom === 0)
   {
     return null;
   }
@@ -394,7 +490,67 @@ IGeometry.getIntersection = function (s1, s2, f1, f2)
   y = (a2 * c1 - a1 * c2) / denom;
 
   return new Point(x, y);
-}
+};
+
+/**
+ * This method finds and returns the angle of the vector from the + x-axis
+ * in clockwise direction (compatible w/ Java coordinate system!).
+ */
+IGeometry.angleOfVector = function(Cx, Cy, Nx, Ny)
+{
+  let C_angle;
+
+  if (Cx !== Nx)
+  {
+    C_angle = Math.atan((Ny - Cy) / (Nx - Cx));
+
+    if (Nx < Cx)
+    {
+      C_angle += Math.PI;
+    }
+    else if (Ny < Cy)
+    {
+      C_angle += this.TWO_PI;
+    }
+  }
+  else if (Ny < Cy)
+  {
+    C_angle = this.ONE_AND_HALF_PI; // 270 degrees
+  }
+  else
+  {
+    C_angle = this.HALF_PI; // 90 degrees
+  }
+
+  return C_angle;
+};
+
+
+/**
+ * This method checks whether the given two line segments (one with point
+ * p1 and p2, the other with point p3 and p4) intersect at a point other
+ * than these points.
+ */
+IGeometry.doIntersect = function(p1, p2, p3, p4){
+  let a = p1.x;
+  let b = p1.y;
+  let c = p2.x;
+  let d = p2.y;
+  let p = p3.x;
+  let q = p3.y;
+  let r = p4.x;
+  let s = p4.y;
+  let det = (c - a) * (s - q) - (r - p) * (d - b);
+
+  if (det === 0) {
+    return false;
+  } else {
+    let lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    let gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+  }
+};
+
 
 // -----------------------------------------------------------------------------
 // Section: Class Constants
@@ -406,5 +562,6 @@ IGeometry.HALF_PI = 0.5 * Math.PI;
 IGeometry.ONE_AND_HALF_PI = 1.5 * Math.PI;
 IGeometry.TWO_PI = 2.0 * Math.PI;
 IGeometry.THREE_PI = 3.0 * Math.PI;
+
 
 module.exports = IGeometry;

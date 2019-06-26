@@ -29,6 +29,7 @@ layoutBase.LGraphManager = require('./src/LGraphManager');
 layoutBase.LNode = require('./src/LNode');
 layoutBase.Layout = require('./src/Layout');
 layoutBase.LayoutConstants = require('./src/LayoutConstants');
+layoutBase.NeedlemanWunsch = require('./src/util/alignment/NeedlemanWunsch');
 
 module.exports = layoutBase;
 
