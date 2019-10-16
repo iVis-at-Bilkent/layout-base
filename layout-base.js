@@ -3491,6 +3491,8 @@ FDLayout.prototype.calcSpringForce = function (edge, idealLength) {
 
   length = edge.getLength();
 
+  if (length == 0) return;
+
   // Calculate spring forces
   springForce = this.springConstant * (length - idealLength);
 
