@@ -32,6 +32,6 @@
     "updater-license": "^1.0.0",
     "forever": "^0.15.3",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "webpack-dev-server": "^3.1.11"
   }
 }
