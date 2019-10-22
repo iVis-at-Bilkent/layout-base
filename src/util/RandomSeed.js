@@ -1,5 +1,6 @@
 function RandomSeed() {
 }
+// adapted from: https://stackoverflow.com/a/19303725
 RandomSeed.seed = 1;
 RandomSeed.x = 0;
 
