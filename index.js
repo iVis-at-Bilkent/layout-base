@@ -30,6 +30,8 @@ layoutBase.LNode = require('./src/LNode');
 layoutBase.Layout = require('./src/Layout');
 layoutBase.LayoutConstants = require('./src/LayoutConstants');
 layoutBase.NeedlemanWunsch = require('./src/util/alignment/NeedlemanWunsch');
+layoutBase.Matrix = require('./src/util/Matrix');
+layoutBase.SVD = require('./src/util/SVD');
 
 module.exports = layoutBase;
 
