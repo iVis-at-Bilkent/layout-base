@@ -316,19 +316,32 @@ LNode.prototype.updateBounds = function () {
       var width = childGraph.getRight() - childGraph.getLeft();
       var height = childGraph.getBottom() - childGraph.getTop();
 
-      if(this.labelWidth > width){
-        this.rect.x -= (this.labelWidth - width) / 2;
-        this.setWidth(this.labelWidth);
+      if(this.labelWidth){
+        if(this.labelPosHorizontal == "left"){
+          this.rect.x -= (this.labelWidth);
+          this.setWidth(width + this.labelWidth);
+        }
+        else if(this.labelPosHorizontal == "center" && this.labelWidth > width){
+          this.rect.x -= (this.labelWidth - width) / 2;
+          this.setWidth(this.labelWidth);
+        }
+        else if(this.labelPosHorizontal == "right"){
+          this.setWidth(width + this.labelWidth);
+        }        
       }
 
-      if(this.labelHeight > height){
-        if(this.labelPos == "center"){
+      if(this.labelHeight){
+        if(this.labelPosVertical == "top"){
+          this.rect.y -= (this.labelHeight);
+          this.setHeight(height + this.labelHeight);
+        }
+        else if(this.labelPosVertical == "center" && this.labelHeight > height){
           this.rect.y -= (this.labelHeight - height) / 2;
+          this.setHeight(this.labelHeight);
         }
-        else if(this.labelPos == "top"){
-          this.rect.y -= (this.labelHeight - height); 
+        else if(this.labelPosVertical == "bottom"){
+          this.setHeight(height + this.labelHeight);
         }
-        this.setHeight(this.labelHeight);
       }
     }
   }
