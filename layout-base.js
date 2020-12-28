@@ -308,7 +308,7 @@ var Integer = __webpack_require__(10);
 var RectangleD = __webpack_require__(13);
 var LayoutConstants = __webpack_require__(0);
 var RandomSeed = __webpack_require__(16);
-var PointD = __webpack_require__(4);
+var PointD = __webpack_require__(5);
 
 function LNode(gm, loc, size, vNode) {
   //Alternative constructor 1 : LNode(LGraphManager gm, Point loc, Dimension size, Object vNode)
@@ -664,6 +664,47 @@ module.exports = LNode;
 "use strict";
 
 
+var LayoutConstants = __webpack_require__(0);
+
+function FDLayoutConstants() {}
+
+//FDLayoutConstants inherits static props in LayoutConstants
+for (var prop in LayoutConstants) {
+  FDLayoutConstants[prop] = LayoutConstants[prop];
+}
+
+FDLayoutConstants.MAX_ITERATIONS = 2500;
+
+FDLayoutConstants.DEFAULT_EDGE_LENGTH = 50;
+FDLayoutConstants.DEFAULT_SPRING_STRENGTH = 0.45;
+FDLayoutConstants.DEFAULT_REPULSION_STRENGTH = 4500.0;
+FDLayoutConstants.DEFAULT_GRAVITY_STRENGTH = 0.4;
+FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_STRENGTH = 1.0;
+FDLayoutConstants.DEFAULT_GRAVITY_RANGE_FACTOR = 3.8;
+FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_RANGE_FACTOR = 1.5;
+FDLayoutConstants.DEFAULT_USE_SMART_IDEAL_EDGE_LENGTH_CALCULATION = true;
+FDLayoutConstants.DEFAULT_USE_SMART_REPULSION_RANGE_CALCULATION = true;
+FDLayoutConstants.DEFAULT_COOLING_FACTOR_INCREMENTAL = 0.3;
+FDLayoutConstants.COOLING_ADAPTATION_FACTOR = 0.33;
+FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT = 1000;
+FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT = 5000;
+FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL = 100.0;
+FDLayoutConstants.MAX_NODE_DISPLACEMENT = FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL * 3;
+FDLayoutConstants.MIN_REPULSION_DIST = FDLayoutConstants.DEFAULT_EDGE_LENGTH / 10.0;
+FDLayoutConstants.CONVERGENCE_CHECK_PERIOD = 100;
+FDLayoutConstants.PER_LEVEL_IDEAL_EDGE_LENGTH_FACTOR = 0.1;
+FDLayoutConstants.MIN_EDGE_LENGTH = 1;
+FDLayoutConstants.GRID_CALCULATION_CHECK_PERIOD = 10;
+
+module.exports = FDLayoutConstants;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 function PointD(x, y) {
   if (x == null && y == null) {
     this.x = 0;
@@ -707,7 +748,7 @@ PointD.prototype.translate = function (dim) {
 module.exports = PointD;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -716,7 +757,7 @@ module.exports = PointD;
 var LGraphObject = __webpack_require__(2);
 var Integer = __webpack_require__(10);
 var LayoutConstants = __webpack_require__(0);
-var LGraphManager = __webpack_require__(6);
+var LGraphManager = __webpack_require__(7);
 var LNode = __webpack_require__(3);
 var LEdge = __webpack_require__(1);
 var RectangleD = __webpack_require__(13);
@@ -1133,7 +1174,7 @@ LGraph.prototype.updateConnected = function () {
 module.exports = LGraph;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1143,7 +1184,7 @@ var LGraph;
 var LEdge = __webpack_require__(1);
 
 function LGraphManager(layout) {
-  LGraph = __webpack_require__(5); // It may be better to initilize this out of this function but it gives an error (Right-hand side of 'instanceof' is not callable) now.
+  LGraph = __webpack_require__(6); // It may be better to initilize this out of this function but it gives an error (Right-hand side of 'instanceof' is not callable) now.
   this.layout = layout;
 
   this.graphs = [];
@@ -1572,47 +1613,6 @@ LGraphManager.prototype.includesInvalidEdge = function () {
 };
 
 module.exports = LGraphManager;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var LayoutConstants = __webpack_require__(0);
-
-function FDLayoutConstants() {}
-
-//FDLayoutConstants inherits static props in LayoutConstants
-for (var prop in LayoutConstants) {
-  FDLayoutConstants[prop] = LayoutConstants[prop];
-}
-
-FDLayoutConstants.MAX_ITERATIONS = 2500;
-
-FDLayoutConstants.DEFAULT_EDGE_LENGTH = 50;
-FDLayoutConstants.DEFAULT_SPRING_STRENGTH = 0.45;
-FDLayoutConstants.DEFAULT_REPULSION_STRENGTH = 4500.0;
-FDLayoutConstants.DEFAULT_GRAVITY_STRENGTH = 0.4;
-FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_STRENGTH = 1.0;
-FDLayoutConstants.DEFAULT_GRAVITY_RANGE_FACTOR = 3.8;
-FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_RANGE_FACTOR = 1.5;
-FDLayoutConstants.DEFAULT_USE_SMART_IDEAL_EDGE_LENGTH_CALCULATION = true;
-FDLayoutConstants.DEFAULT_USE_SMART_REPULSION_RANGE_CALCULATION = true;
-FDLayoutConstants.DEFAULT_COOLING_FACTOR_INCREMENTAL = 0.3;
-FDLayoutConstants.COOLING_ADAPTATION_FACTOR = 0.33;
-FDLayoutConstants.ADAPTATION_LOWER_NODE_LIMIT = 1000;
-FDLayoutConstants.ADAPTATION_UPPER_NODE_LIMIT = 5000;
-FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL = 100.0;
-FDLayoutConstants.MAX_NODE_DISPLACEMENT = FDLayoutConstants.MAX_NODE_DISPLACEMENT_INCREMENTAL * 3;
-FDLayoutConstants.MIN_REPULSION_DIST = FDLayoutConstants.DEFAULT_EDGE_LENGTH / 10.0;
-FDLayoutConstants.CONVERGENCE_CHECK_PERIOD = 100;
-FDLayoutConstants.PER_LEVEL_IDEAL_EDGE_LENGTH_FACTOR = 0.1;
-FDLayoutConstants.MIN_EDGE_LENGTH = 1;
-FDLayoutConstants.GRID_CALCULATION_CHECK_PERIOD = 10;
-
-module.exports = FDLayoutConstants;
 
 /***/ }),
 /* 8 */
@@ -2556,11 +2556,11 @@ module.exports = UniqueIDGeneretor;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var LayoutConstants = __webpack_require__(0);
-var LGraphManager = __webpack_require__(6);
+var LGraphManager = __webpack_require__(7);
 var LNode = __webpack_require__(3);
 var LEdge = __webpack_require__(1);
-var LGraph = __webpack_require__(5);
-var PointD = __webpack_require__(4);
+var LGraph = __webpack_require__(6);
+var PointD = __webpack_require__(5);
 var Transform = __webpack_require__(17);
 var Emitter = __webpack_require__(29);
 
@@ -3176,7 +3176,7 @@ module.exports = RandomSeed;
 "use strict";
 
 
-var PointD = __webpack_require__(4);
+var PointD = __webpack_require__(5);
 
 function Transform(x, y) {
   this.lworldOrgX = 0.0;
@@ -3311,7 +3311,7 @@ module.exports = Transform;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var Layout = __webpack_require__(15);
-var FDLayoutConstants = __webpack_require__(7);
+var FDLayoutConstants = __webpack_require__(4);
 var LayoutConstants = __webpack_require__(0);
 var IGeometry = __webpack_require__(8);
 var IMath = __webpack_require__(9);
@@ -3320,9 +3320,6 @@ function FDLayout() {
   Layout.call(this);
 
   this.useSmartIdealEdgeLengthCalculation = FDLayoutConstants.DEFAULT_USE_SMART_IDEAL_EDGE_LENGTH_CALCULATION;
-  this.idealEdgeLength = FDLayoutConstants.DEFAULT_EDGE_LENGTH;
-  this.springConstant = FDLayoutConstants.DEFAULT_SPRING_STRENGTH;
-  this.repulsionConstant = FDLayoutConstants.DEFAULT_REPULSION_STRENGTH;
   this.gravityConstant = FDLayoutConstants.DEFAULT_GRAVITY_STRENGTH;
   this.compoundGravityConstant = FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_STRENGTH;
   this.gravityRangeFactor = FDLayoutConstants.DEFAULT_GRAVITY_RANGE_FACTOR;
@@ -3354,6 +3351,7 @@ FDLayout.prototype.initParameters = function () {
 
 FDLayout.prototype.calcIdealEdgeLengths = function () {
   var edge;
+  var originalIdealLength;
   var lcaDepth;
   var source;
   var target;
@@ -3364,7 +3362,7 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
   for (var i = 0; i < allEdges.length; i++) {
     edge = allEdges[i];
 
-    edge.idealLength = this.idealEdgeLength;
+    originalIdealLength = edge.idealLength;
 
     if (edge.isInterGraph) {
       source = edge.getSource();
@@ -3379,7 +3377,7 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
 
       lcaDepth = edge.getLca().getInclusionTreeDepth();
 
-      edge.idealLength += FDLayoutConstants.DEFAULT_EDGE_LENGTH * FDLayoutConstants.PER_LEVEL_IDEAL_EDGE_LENGTH_FACTOR * (source.getInclusionTreeDepth() + target.getInclusionTreeDepth() - 2 * lcaDepth);
+      edge.idealLength += originalIdealLength * FDLayoutConstants.PER_LEVEL_IDEAL_EDGE_LENGTH_FACTOR * (source.getInclusionTreeDepth() + target.getInclusionTreeDepth() - 2 * lcaDepth);
     }
   }
 };
@@ -3404,6 +3402,8 @@ FDLayout.prototype.initSpringEmbedder = function () {
 
   this.maxIterations = Math.max(this.getAllNodes().length * 5, this.maxIterations);
 
+  // Reassign this attribute by using new constant value
+  this.displacementThresholdPerNode = 3.0 * FDLayoutConstants.DEFAULT_EDGE_LENGTH / 100;
   this.totalDisplacementThreshold = this.displacementThresholdPerNode * this.getAllNodes().length;
 
   this.repulsionRange = this.calcRepulsionRange();
@@ -3505,7 +3505,7 @@ FDLayout.prototype.calcSpringForce = function (edge, idealLength) {
   if (length == 0) return;
 
   // Calculate spring forces
-  springForce = this.springConstant * (length - idealLength);
+  springForce = edge.edgeElasticity * (length - idealLength);
 
   // Project force onto x and y axes
   springForceX = springForce * (edge.lengthX / length);
@@ -3574,7 +3574,8 @@ FDLayout.prototype.calcRepulsionForce = function (nodeA, nodeB) {
       distanceSquared = distanceX * distanceX + distanceY * distanceY;
       distance = Math.sqrt(distanceSquared);
 
-      repulsionForce = this.repulsionConstant * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
+      // Here we use half of the nodes' repulsion values for backward compatibility
+      repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
 
       // Project force onto x and y axes
       repulsionForceX = repulsionForce * distanceX / distance;
@@ -3782,11 +3783,14 @@ module.exports = FDLayout;
 
 
 var LEdge = __webpack_require__(1);
-var FDLayoutConstants = __webpack_require__(7);
+var FDLayoutConstants = __webpack_require__(4);
 
 function FDLayoutEdge(source, target, vEdge) {
   LEdge.call(this, source, target, vEdge);
+
+  // Ideal length and elasticity value for this edge
   this.idealLength = FDLayoutConstants.DEFAULT_EDGE_LENGTH;
+  this.edgeElasticity = FDLayoutConstants.DEFAULT_SPRING_STRENGTH;
 }
 
 FDLayoutEdge.prototype = Object.create(LEdge.prototype);
@@ -3805,10 +3809,15 @@ module.exports = FDLayoutEdge;
 
 
 var LNode = __webpack_require__(3);
+var FDLayoutConstants = __webpack_require__(4);
 
 function FDLayoutNode(gm, loc, size, vNode) {
   // alternative constructor is handled inside LNode
   LNode.call(this, gm, loc, size, vNode);
+
+  // Repulsion value of this node
+  this.nodeRepulsion = FDLayoutConstants.DEFAULT_REPULSION_STRENGTH;
+
   //Spring, repulsion and gravitational forces acting on this node
   this.springForceX = 0;
   this.springForceY = 0;
@@ -5085,7 +5094,7 @@ var layoutBase = function layoutBase() {
 };
 
 layoutBase.FDLayout = __webpack_require__(18);
-layoutBase.FDLayoutConstants = __webpack_require__(7);
+layoutBase.FDLayoutConstants = __webpack_require__(4);
 layoutBase.FDLayoutEdge = __webpack_require__(19);
 layoutBase.FDLayoutNode = __webpack_require__(20);
 layoutBase.DimensionD = __webpack_require__(21);
@@ -5095,7 +5104,7 @@ layoutBase.IGeometry = __webpack_require__(8);
 layoutBase.IMath = __webpack_require__(9);
 layoutBase.Integer = __webpack_require__(10);
 layoutBase.Point = __webpack_require__(12);
-layoutBase.PointD = __webpack_require__(4);
+layoutBase.PointD = __webpack_require__(5);
 layoutBase.RandomSeed = __webpack_require__(16);
 layoutBase.RectangleD = __webpack_require__(13);
 layoutBase.Transform = __webpack_require__(17);
@@ -5103,9 +5112,9 @@ layoutBase.UniqueIDGeneretor = __webpack_require__(14);
 layoutBase.Quicksort = __webpack_require__(25);
 layoutBase.LinkedList = __webpack_require__(11);
 layoutBase.LGraphObject = __webpack_require__(2);
-layoutBase.LGraph = __webpack_require__(5);
+layoutBase.LGraph = __webpack_require__(6);
 layoutBase.LEdge = __webpack_require__(1);
-layoutBase.LGraphManager = __webpack_require__(6);
+layoutBase.LGraphManager = __webpack_require__(7);
 layoutBase.LNode = __webpack_require__(3);
 layoutBase.Layout = __webpack_require__(15);
 layoutBase.LayoutConstants = __webpack_require__(0);

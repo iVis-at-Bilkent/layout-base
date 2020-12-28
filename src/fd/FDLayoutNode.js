@@ -1,8 +1,13 @@
 var LNode = require('../LNode');
+var FDLayoutConstants = require('./FDLayoutConstants');
 
 function FDLayoutNode(gm, loc, size, vNode) {
   // alternative constructor is handled inside LNode
   LNode.call(this, gm, loc, size, vNode);
+  
+  // Repulsion value of this node
+  this.nodeRepulsion = FDLayoutConstants.DEFAULT_REPULSION_STRENGTH;
+    
   //Spring, repulsion and gravitational forces acting on this node
   this.springForceX = 0;
   this.springForceY = 0;

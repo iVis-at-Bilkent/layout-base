@@ -8,9 +8,6 @@ function FDLayout() {
   Layout.call(this);
 
   this.useSmartIdealEdgeLengthCalculation = FDLayoutConstants.DEFAULT_USE_SMART_IDEAL_EDGE_LENGTH_CALCULATION;
-  this.idealEdgeLength = FDLayoutConstants.DEFAULT_EDGE_LENGTH;
-  this.springConstant = FDLayoutConstants.DEFAULT_SPRING_STRENGTH;
-  this.repulsionConstant = FDLayoutConstants.DEFAULT_REPULSION_STRENGTH;
   this.gravityConstant = FDLayoutConstants.DEFAULT_GRAVITY_STRENGTH;
   this.compoundGravityConstant = FDLayoutConstants.DEFAULT_COMPOUND_GRAVITY_STRENGTH;
   this.gravityRangeFactor = FDLayoutConstants.DEFAULT_GRAVITY_RANGE_FACTOR;
@@ -42,6 +39,7 @@ FDLayout.prototype.initParameters = function () {
 
 FDLayout.prototype.calcIdealEdgeLengths = function () {
   var edge;
+  var originalIdealLength;
   var lcaDepth;
   var source;
   var target;
@@ -52,8 +50,8 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
   for (var i = 0; i < allEdges.length; i++)
   {
     edge = allEdges[i];
-
-    edge.idealLength = this.idealEdgeLength;
+    
+    originalIdealLength = edge.idealLength;
 
     if (edge.isInterGraph)
     {
@@ -71,7 +69,7 @@ FDLayout.prototype.calcIdealEdgeLengths = function () {
 
       lcaDepth = edge.getLca().getInclusionTreeDepth();
 
-      edge.idealLength += FDLayoutConstants.DEFAULT_EDGE_LENGTH *
+      edge.idealLength += originalIdealLength *
               FDLayoutConstants.PER_LEVEL_IDEAL_EDGE_LENGTH_FACTOR *
               (source.getInclusionTreeDepth() +
                       target.getInclusionTreeDepth() - 2 * lcaDepth);
@@ -103,9 +101,10 @@ FDLayout.prototype.initSpringEmbedder = function () {
 
   this.maxIterations =
           Math.max(this.getAllNodes().length * 5, this.maxIterations);
-
-  this.totalDisplacementThreshold =
-          this.displacementThresholdPerNode * this.getAllNodes().length;
+  
+  // Reassign this attribute by using new constant value
+  this.displacementThresholdPerNode = (3.0 * FDLayoutConstants.DEFAULT_EDGE_LENGTH) / 100;
+  this.totalDisplacementThreshold = this.displacementThresholdPerNode * this.getAllNodes().length;
 
   this.repulsionRange = this.calcRepulsionRange();
 };
@@ -220,7 +219,7 @@ FDLayout.prototype.calcSpringForce = function (edge, idealLength) {
     return;
   
   // Calculate spring forces
-  springForce = this.springConstant * (length - idealLength);
+  springForce = edge.edgeElasticity * (length - idealLength);
 
   // Project force onto x and y axes
   springForceX = springForce * (edge.lengthX / length);
@@ -298,8 +297,9 @@ FDLayout.prototype.calcRepulsionForce = function (nodeA, nodeB) {
 
     distanceSquared = distanceX * distanceX + distanceY * distanceY;
     distance = Math.sqrt(distanceSquared);
-
-    repulsionForce = this.repulsionConstant * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
+    
+    // Here we use half of the nodes' repulsion values for backward compatibility
+    repulsionForce = (nodeA.nodeRepulsion / 2 + nodeB.nodeRepulsion / 2) * nodeA.noOfChildren * nodeB.noOfChildren / distanceSquared;
 
     // Project force onto x and y axes
     repulsionForceX = repulsionForce * distanceX / distance;
