@@ -1,6 +1,6 @@
 {
   "name": "layout-base",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Basic layout model and some utilities for Cytoscape.js layout extensions",
   "main": "layout-base.js",
   "scripts": {
