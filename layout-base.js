@@ -2088,6 +2088,57 @@ IGeometry.doIntersect = function (p1, p2, p3, p4) {
   }
 };
 
+/**
+ * This method checks and calculates the intersection of 
+ * a line segment and a circle.
+ */
+IGeometry.findCircleLineIntersections = function (Ex, Ey, Lx, Ly, Cx, Cy, r) {
+
+  // E is the starting point of the ray,
+  // L is the end point of the ray,
+  // C is the center of sphere you're testing against
+  // r is the radius of that sphere
+
+  // Compute:
+  // d = L - E ( Direction vector of ray, from start to end )
+  // f = E - C ( Vector from center sphere to ray start )
+
+  // Then the intersection is found by..
+  // P = E + t * d
+  // This is a parametric equation:
+  // Px = Ex + tdx
+  // Py = Ey + tdy
+
+  // get a, b, c values
+  var a = (Lx - Ex) * (Lx - Ex) + (Ly - Ey) * (Ly - Ey);
+  var b = 2 * ((Ex - Cx) * (Lx - Ex) + (Ey - Cy) * (Ly - Ey));
+  var c = (Ex - Cx) * (Ex - Cx) + (Ey - Cy) * (Ey - Cy) - r * r;
+
+  // get discriminant
+  var disc = b * b - 4 * a * c;
+  if (disc >= 0) {
+    // insert into quadratic formula
+    var t1 = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+    var t2 = (-b - Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+    var intersections = null;
+    if (t1 >= 0 && t1 <= 1) {
+      // t1 is the intersection, and it's closer than t2
+      // (since t1 uses -b - discriminant)
+      // Impale, Poke
+      return [t1];
+    }
+
+    // here t1 didn't intersect so we are either started
+    // inside the sphere or completely past it
+    if (t2 >= 0 && t2 <= 1) {
+      // ExitWound
+      return [t2];
+    }
+
+    return intersections;
+  } else return null;
+};
+
 // -----------------------------------------------------------------------------
 // Section: Class Constants
 // -----------------------------------------------------------------------------
