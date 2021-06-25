@@ -474,6 +474,7 @@ LGraphManager.prototype.calcInclusionTreeDepths = function (graph, depth) {
 LGraphManager.prototype.includesInvalidEdge = function ()
 {
   var edge;
+  var edgesToRemove = [];
 
   var s = this.edges.length;
   for (var i = 0; i < s; i++)
@@ -482,9 +483,17 @@ LGraphManager.prototype.includesInvalidEdge = function ()
 
     if (this.isOneAncestorOfOther(edge.source, edge.target))
     {
-      return true;
+      edgesToRemove.push(edge);
     }
   }
+  
+  // Remove invalid edges from graph manager
+  for (var i = 0; i < edgesToRemove.length; i++)
+  {
+    this.remove(edgesToRemove[i]);
+  }
+  
+  // Invalid edges are cleared, so return false
   return false;
 };
 
