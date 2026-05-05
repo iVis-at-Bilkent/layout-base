@@ -1647,7 +1647,7 @@ function IGeometry() {}
  * separation buffer added to the amount in both directions. We assume that
  * the two rectangles do intersect.
  */
-IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separationBuffer) {
+IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separationBuffer, separationAxis) {
   if (!rectA.intersects(rectB)) {
     throw "assert failed";
   }
@@ -1717,6 +1717,17 @@ IGeometry.calcSeparationAmount = function (rectA, rectB, overlapAmount, separati
     *
     */
     overlapAmount[1] += Math.min(rectA.getY() - rectB.getY(), rectB.getBottom() - rectA.getBottom());
+  }
+
+  // If a specific axis is requested (e.g., for boundary nodes), bypass the slope-based separation
+  // and resolve the overlap purely along the specified axis
+  if (separationAxis) {
+    var _moveByX = separationAxis === 'x' ? overlapAmount[0] : 0;
+    var _moveByY = separationAxis === 'y' ? overlapAmount[1] : 0;
+
+    overlapAmount[0] = -1 * directions[0] * (_moveByX + separationBuffer);
+    overlapAmount[1] = -1 * directions[1] * (_moveByY + separationBuffer);
+    return;
   }
 
   // find slope of the line passes two centers
