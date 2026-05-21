@@ -6,6 +6,7 @@ var LGraph = require('./LGraph');
 var PointD = require('./util/PointD');
 var Transform = require('./util/Transform');
 var Emitter = require('./util/Emitter');
+var LinkedList = require('./util/LinkedList');
 
 function Layout(isRemoteUse) {
   Emitter.call( this );
@@ -97,7 +98,7 @@ Layout.prototype.checkLayoutSuccess = function() {
 Layout.prototype.runLayout = function ()
 {
   this.isLayoutFinished = false;
-  
+
   if (this.tilingPreLayout) {
     this.tilingPreLayout();
   }
@@ -113,13 +114,13 @@ Layout.prototype.runLayout = function ()
   {
     isLayoutSuccessfull = this.layout();
   }
-  
+
   if (LayoutConstants.ANIMATE === 'during') {
-    // If this is a 'during' layout animation. Layout is not finished yet. 
+    // If this is a 'during' layout animation. Layout is not finished yet.
     // We need to perform these in index.js when layout is really finished.
     return false;
   }
-  
+
   if (isLayoutSuccessfull)
   {
     if (!this.isSubLayout)
@@ -375,7 +376,7 @@ Layout.prototype.getFlatForest = function ()
   // Run BFS for each component of the graph.
 
   var visited = new Set();
-  var toBeVisited = [];
+  var toBeVisited = new LinkedList();
   var parents = new Map();
   var unProcessedNodes = [];
 
@@ -391,11 +392,9 @@ Layout.prototype.getFlatForest = function ()
 
     // Start the BFS. Each iteration of this loop visits a node in a
     // BFS manner.
-    while (toBeVisited.length > 0 && isForest)
+    while (toBeVisited.size() > 0 && isForest)
     {
-      //pool operation
-      var currentNode = toBeVisited[0];
-      toBeVisited.splice(0, 1);
+      var currentNode = toBeVisited.shift();
       visited.add(currentNode);
 
       // Traverse all neighbors of this node
